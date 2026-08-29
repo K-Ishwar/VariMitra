@@ -314,8 +314,11 @@ window.generateRouteForm = function(isEditMode = false) {
             trashIcon = `<button onclick="window.removeDay(${i})" style="position: absolute; top: 12px; right: 12px; background: none; border: none; color: var(--vermilion); cursor: pointer; font-size: 18px;" title="Remove Day">🗑️</button>`;
         }
 
+        const borderColors = ['#F2A93B', '#C1432B', '#5C7A5E', '#1B2340', '#D6871A', '#8A7D63'];
+        const dayColor = borderColors[i % borderColors.length];
+
         html += `
-            <div class="card" style="margin-bottom: 24px; padding: 16px; background: var(--paper-2); overflow: visible; position: relative;">
+            <div class="card" style="margin-bottom: 24px; padding: 16px; background: var(--paper-2); overflow: visible; position: relative; border-left: 4px solid ${dayColor};">
                 ${trashIcon}
                 <div style="font-weight: 600; margin-bottom: 12px; color: var(--marigold-deep);">Day ${i + 1} - ${dateStr}</div>
                 <div style="display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap;">

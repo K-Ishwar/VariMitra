@@ -1,353 +1,844 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VariMitra - Emergency Alert System</title>
-    <link rel="stylesheet" href="CSS/style.css">
-    <style>
-        body {
-            background-color: var(--paper);
-        }
-        .container {
-            max-width: 800px;
-            margin: 40px auto;
-            padding: 0 16px;
-        }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 32px;
-        }
-        .pill-toggle {
-            display: inline-flex;
-            background-color: var(--paper-2);
-            border-radius: 50px;
-            padding: 4px;
-            border: 1px solid var(--line);
-        }
-        .pill-toggle button {
-            background: transparent;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 50px;
-            cursor: pointer;
-            font-family: inherit;
-            font-weight: 600;
-            color: var(--ink);
-            transition: all 0.2s ease;
-        }
-        .pill-toggle button.active {
-            background-color: var(--vermilion);
-            color: white;
-        }
-        
-        .form-group {
-            margin-bottom: 24px;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: var(--night);
-        }
-        select.input-field {
-            appearance: none;
-            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%231B2340%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
-            background-repeat: no-repeat, repeat;
-            background-position: right .7em top 50%, 0 0;
-            background-size: .65em auto, 100%;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VariMitra — Emergency Alert System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600&family=Inter:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="CSS/style.css">
 
-        .preview-card {
-            background-color: var(--night);
-            color: white;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 32px;
-            border: 1px solid var(--night-2);
-        }
-        .preview-title {
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--marigold);
-            margin-bottom: 12px;
-            font-weight: 700;
-        }
-        .preview-content {
-            font-size: 16px;
-            line-height: 1.5;
-            white-space: pre-wrap;
-        }
+<style>
+/* =============================================
+   EMERGENCY ALERT SYSTEM — PAGE STYLES
+   ============================================= */
 
-        .btn-dispatch {
-            width: 100%;
-            background-color: var(--vermilion);
-            font-size: 18px;
-            padding: 16px;
-        }
-        .btn-dispatch:hover {
-            background-color: #a83823;
-        }
+/* Screen switching — CRITICAL */
+.ea-screen { display: none; }
+.ea-screen.active { display: block; }
 
-        /* Receipt View */
-        #receipt-view {
-            display: none;
-            text-align: center;
-        }
-        
-        .progress-container {
-            width: 100%;
-            background-color: var(--paper-2);
-            border-radius: 50px;
-            height: 24px;
-            overflow: hidden;
-            margin: 32px 0;
-            border: 1px solid var(--line);
-        }
-        .progress-bar {
-            height: 100%;
-            background-color: var(--sage);
-            width: 0%;
-            transition: width 2s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
-            margin-top: 32px;
-        }
-        .stat-card {
-            background: white;
-            border: 1px solid var(--line);
-            border-radius: 12px;
-            padding: 24px 16px;
-        }
-        .stat-value {
-            font-size: 32px;
-            font-family: var(--font-heading);
-            color: var(--night);
-            margin-bottom: 8px;
-        }
-        .stat-label {
-            font-size: 14px;
-            color: var(--sage);
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-        .status-badge {
-            display: inline-block;
-            padding: 8px 16px;
-            border-radius: 50px;
-            background-color: var(--sage);
-            color: white;
-            font-weight: 600;
-            margin-bottom: 16px;
-        }
-    </style>
+/* Header bar */
+.ea-header {
+    background: var(--paper-2);
+    padding: 16px 20px;
+    border-radius: 14px;
+    border: 1px solid var(--line);
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.ea-header h3 { margin: 0; font-size: 17px; font-family: 'Inter', sans-serif; font-weight: 700; }
+
+/* Progress dots */
+.ea-dots { display: flex; gap: 6px; margin-bottom: 24px; }
+.ea-dot { height: 5px; flex: 1; border-radius: 99px; background: var(--line); }
+.ea-dot.on { background: var(--marigold-deep); }
+
+/* Mode toggle */
+.mode-toggle { display: flex; gap: 4px; background: var(--paper); border: 1.5px solid var(--line); border-radius: 99px; padding: 4px; }
+.mode-btn { padding: 6px 16px; border-radius: 99px; border: none; cursor: pointer; font-size: 13px; font-weight: 700; transition: all 0.2s; background: transparent; color: #8a7d63; }
+.mode-btn.active { background: var(--night); color: #fff; }
+.mode-btn.live-active { background: var(--vermilion) !important; color: #fff !important; }
+
+/* Section title inside screen */
+.ea-title { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 22px; margin: 0 0 6px; color: var(--ink); }
+.ea-subtitle { font-size: 14px; color: #7a6d54; margin: 0 0 24px; }
+
+/* Back button */
+.ea-back { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: #8a7d63; background: none; border: none; cursor: pointer; padding: 0; margin-bottom: 20px; }
+.ea-back:hover { color: var(--marigold-deep); }
+
+/* Field */
+.ea-field { margin-bottom: 18px; }
+.ea-label { display: block; font-size: 13px; font-weight: 700; color: #5a5140; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.04em; }
+.ea-input { width: 100%; border: 1.5px solid var(--line); background: #fff; border-radius: 12px; padding: 13px 15px; font-size: 15px; font-family: inherit; color: var(--ink); outline: none; box-sizing: border-box; }
+.ea-input:focus { border-color: var(--marigold-deep); }
+.ea-select { width: 100%; border: 1.5px solid var(--line); background: #fff; border-radius: 12px; padding: 13px 15px; font-size: 15px; font-family: inherit; color: var(--ink); outline: none; cursor: pointer; }
+
+/* Target card */
+.ea-target-card { border: 1.5px solid var(--line); border-radius: 14px; background: #fff; overflow: hidden; }
+.ea-option { padding: 16px 18px; display: flex; align-items: center; gap: 14px; cursor: pointer; border-bottom: 1px solid var(--line); transition: background 0.15s; }
+.ea-option:last-child { border-bottom: none; }
+.ea-option.selected { background: #FFF8E8; }
+.ea-radio { width: 18px; height: 18px; border: 2px solid #B5A889; border-radius: 50%; flex: none; transition: all 0.15s; }
+.ea-option.selected .ea-radio { border-color: var(--marigold-deep); background: var(--marigold); box-shadow: inset 0 0 0 4px #fff; }
+.ea-option-title { font-size: 15px; font-weight: 700; color: var(--ink); }
+.ea-option-desc { font-size: 13px; color: #8A7D63; margin-top: 2px; }
+
+/* Dindi count badge */
+.ea-count-badge { display: inline-flex; align-items: center; gap: 8px; background: #E8F1E8; color: #3F6842; border: 1px solid #BBD0BC; border-radius: 10px; padding: 10px 16px; font-size: 14px; font-weight: 700; margin-top: 14px; }
+
+/* Region info box */
+.ea-region-box { background: var(--paper-2); border: 1px solid var(--line); border-radius: 12px; padding: 14px; margin-top: 10px; }
+.ea-region-title { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+.ea-region-info { font-size: 13px; color: #766950; line-height: 1.5; }
+.ea-region-count { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; font-size: 14px; }
+.ea-region-count strong { font-size: 22px; font-family: 'Fraunces', serif; color: var(--sage); }
+
+/* Template grid */
+.ea-template-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+.ea-template { border: 1.5px solid var(--line); background: #fff; border-radius: 12px; padding: 14px 10px; cursor: pointer; text-align: center; font-size: 13px; font-weight: 700; color: #5a5140; transition: all 0.15s; }
+.ea-template:hover { border-color: var(--marigold-deep); background: #FFF8E8; }
+.ea-template.selected { background: var(--night); color: #fff; border-color: var(--night); }
+
+/* Preview box */
+.ea-preview { background: #F5F0E4; border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin: 16px 0; }
+.ea-preview-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: #8a7d63; font-weight: 700; margin-bottom: 6px; }
+.ea-preview-text { font-size: 14px; line-height: 1.55; margin-bottom: 12px; }
+.ea-preview-text:last-child { margin-bottom: 0; }
+
+/* Channel toggles */
+.ea-channel-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.ea-channel-chip { display: flex; align-items: center; gap: 8px; padding: 11px 18px; border: 2px solid var(--line); border-radius: 12px; background: #fff; cursor: pointer; font-size: 14px; font-weight: 700; color: #7a6d54; transition: all 0.2s; user-select: none; }
+.ea-channel-chip.on { border-color: var(--sage); background: #E8F1E8; color: #3F6842; }
+
+/* Location search */
+.ea-location-wrap { position: relative; }
+.ea-location-results { display: none; position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1.5px solid var(--line); border-top: none; border-radius: 0 0 12px 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); z-index: 99; max-height: 220px; overflow-y: auto; }
+.ea-location-item { padding: 11px 15px; cursor: pointer; font-size: 14px; border-bottom: 1px solid #f0ebe2; }
+.ea-location-item:hover { background: var(--paper-2); }
+
+/* Main CTA buttons */
+.ea-btn-primary { width: 100%; border: none; border-radius: 14px; padding: 17px; font-size: 16px; font-weight: 700; cursor: pointer; font-family: 'Inter', sans-serif; background: var(--marigold); color: var(--ink); margin-top: 10px; }
+.ea-btn-danger { width: 100%; border: none; border-radius: 14px; padding: 17px; font-size: 16px; font-weight: 700; cursor: pointer; font-family: 'Inter', sans-serif; background: var(--vermilion); color: #fff; margin-top: 10px; }
+.ea-btn-primary:active, .ea-btn-danger:active { transform: scale(0.99); }
+
+/* Delivery screen */
+.ea-success-head { display: flex; align-items: center; gap: 14px; margin-bottom: 24px; }
+.ea-success-icon { width: 48px; height: 48px; background: #E4F0E4; color: var(--sage); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; flex: none; }
+.ea-stat-card { background: #fff; border: 1.5px solid var(--line); border-radius: 16px; padding: 18px; margin-bottom: 14px; }
+.ea-stat-row { display: flex; justify-content: space-between; align-items: center; padding: 11px 0; border-bottom: 1px solid var(--line); font-size: 15px; }
+.ea-stat-row:last-child { border-bottom: none; }
+.ea-stat-num { font-weight: 700; font-family: 'Fraunces', serif; font-size: 20px; }
+.ea-bar { height: 8px; border-radius: 99px; background: var(--paper-2); overflow: hidden; margin: 12px 0 6px; }
+.ea-bar-fill { height: 100%; background: var(--sage); width: 0%; transition: width 0.8s ease; }
+.ea-channel-stat { display: flex; gap: 10px; margin-top: 10px; }
+.ea-channel-box { flex: 1; border: 1px solid var(--line); border-radius: 10px; padding: 12px; text-align: center; font-size: 13px; background: #fff; }
+.ea-channel-box b { display: block; font-size: 14px; margin-bottom: 4px; }
+.ea-channel-box span { color: var(--sage); font-weight: 700; }
+.ea-leader-list { margin-top: 4px; }
+.ea-leader { display: flex; align-items: center; justify-content: space-between; padding: 11px 0; border-bottom: 1px solid var(--line); }
+.ea-leader:last-child { border-bottom: none; }
+.ea-leader-left { display: flex; align-items: center; gap: 10px; }
+.ea-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--night); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex: none; }
+.ea-leader-name { font-size: 14px; font-weight: 700; }
+.ea-leader-meta { font-size: 12px; color: #8A7D63; margin-top: 2px; }
+.ea-receipt { font-size: 12px; padding: 5px 10px; border-radius: 999px; background: #E5F0E5; color: #3F6842; font-weight: 700; }
+
+/* Audit block */
+.ea-audit { background: var(--night); color: #fff; border-radius: 14px; padding: 16px; margin-top: 16px; }
+.ea-audit-row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,.1); }
+.ea-audit-row:last-child { border: none; }
+.ea-audit-label { color: #9aa2cf; }
+.ea-audit-value { font-weight: 700; }
+</style>
 </head>
 <body>
+<div class="app-container">
 
-    <div class="container">
-        
-        <!-- STATE 1: COMPOSE -->
-        <div id="compose-view">
-            <div class="header">
-                <h2>🚨 Emergency Alert System</h2>
-                <div class="pill-toggle">
-                    <button id="mode-mock" class="active" onclick="setMode('mock')">Mock Mode</button>
-                    <button id="mode-live" onclick="setMode('live')">Live Mode</button>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="form-group">
-                    <label>Target Audience</label>
-                    <select id="audience" class="input-field">
-                        <option value="dindis">All Active Dindis</option>
-                        <option value="zone">Specific Zone</option>
-                        <option value="ngos">All NGOs</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Alert Template</label>
-                    <select id="template" class="input-field" onchange="updatePreview()">
-                        <option value="">-- Select Template --</option>
-                        <option value="flood">🌊 Flood Warning</option>
-                        <option value="accident">🚗 Road Accident</option>
-                        <option value="route">🔄 Route Change</option>
-                        <option value="camp">⛺ Camp Closure</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Custom Details (Optional)</label>
-                    <input type="text" id="custom-details" class="input-field" placeholder="e.g. Bridge on NH65 is closed" oninput="updatePreview()">
-                </div>
-
-                <div class="preview-card">
-                    <div class="preview-title">Live Message Preview</div>
-                    <div id="preview-text" class="preview-content">Select a template to generate the alert message...</div>
-                </div>
-
-                <button id="dispatch-btn" class="btn-primary btn-dispatch" onclick="dispatchAlert()">Dispatch Alert</button>
-            </div>
+<!-- Navbar -->
+<nav class="navbar">
+    <div style="display:flex;align-items:center;gap:16px;">
+        <div class="wordmark" style="cursor:pointer;" onclick="window.location.href='dashboard.html'">Vari<span>Mitra</span></div>
+        <div class="langtoggle">
+            <button id="btnEN" class="active">EN</button>
+            <button id="btnMR">मरा</button>
         </div>
+    </div>
+    <div class="nav-links" id="navContainer">
+        <button class="nav-btn" style="display:block;" onclick="window.location.href='dashboard.html'">🏠 Back to Dashboard</button>
+    </div>
+</nav>
 
-        <!-- STATE 2: RECEIPT -->
-        <div id="receipt-view" class="card">
-            <h2>Dispatching Alert...</h2>
-            <div class="status-badge" id="dispatch-status">In Progress</div>
-            
-            <p>Target Audience: <strong id="receipt-audience">All Active Dindis</strong></p>
-            
-            <div class="progress-container">
-                <div class="progress-bar" id="progress-bar"></div>
-            </div>
+<main class="main-content">
+<div class="dashboard-card">
 
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-value" id="stat-targeted">0</div>
-                    <div class="stat-label">Targeted</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="stat-delivered">0</div>
-                    <div class="stat-label">Delivered</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="stat-pending">0</div>
-                    <div class="stat-label">Pending</div>
-                </div>
-            </div>
-            
-            <div style="margin-top: 32px;">
-                <button class="btn-primary" onclick="resetView()">Create New Alert</button>
-            </div>
+    <!-- ── Header ── -->
+    <div class="ea-header">
+        <h3>🚨 Emergency Alert System</h3>
+        <div class="mode-toggle">
+            <button id="btnMock" class="mode-btn active" onclick="setMode('mock')">Mock</button>
+            <button id="btnLive" class="mode-btn" onclick="setMode('live')">Live Send</button>
         </div>
-
     </div>
 
-    <script>
-        // Check Authority Access
-        if (localStorage.getItem('userRole') !== 'authority' && localStorage.getItem('userRole') !== 'super_admin') {
-            document.body.innerHTML = '<h2 style="text-align:center; margin-top:50px;">Access Denied. Authority only.</h2>';
-        }
+    <!-- ── Progress dots ── -->
+    <div class="ea-dots" id="eaDots"></div>
 
-        let currentMode = 'mock';
+    <!-- ══════════════════════════════════════════════ -->
+    <!-- SCREEN 1 — TARGET AUDIENCE                    -->
+    <!-- ══════════════════════════════════════════════ -->
+    <div class="ea-screen active" id="eaScreen1">
+
+        <h2 class="ea-title">Emergency Alert</h2>
+        <p class="ea-subtitle">Create a verified, targeted warning for Dindi Leaders.</p>
+
+        <div class="ea-field">
+            <span class="ea-label">Target audience</span>
+            <div class="ea-target-card">
+
+                <div class="ea-option selected" id="targetAll" onclick="selectTarget('all')">
+                    <div class="ea-radio"></div>
+                    <div>
+                        <div class="ea-option-title">ALL active Dindis</div>
+                        <div class="ea-option-desc">For severe route-wide emergencies</div>
+                    </div>
+                </div>
+
+                <div class="ea-option" id="targetDindi" onclick="selectTarget('dindi')">
+                    <div class="ea-radio"></div>
+                    <div>
+                        <div class="ea-option-title">Specific Dindis</div>
+                        <div class="ea-option-desc">Choose Dindi by ID or name</div>
+                    </div>
+                </div>
+
+                <div class="ea-option" id="targetZone" onclick="selectTarget('zone')">
+                    <div class="ea-radio"></div>
+                    <div>
+                        <div class="ea-option-title">Specific Zone / Region</div>
+                        <div class="ea-option-desc">System finds leaders near the selected region</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Count badge — shown only for 'All Dindis' target -->
+        <div id="allDindiCount">
+            <div class="ea-count-badge">✅ <span id="totalDindiCount">78</span> active Dindi Leaders will be notified</div>
+        </div>
+
+        <!-- Specific Dindi picker (multi-select) -->
+        <div class="ea-field" id="dindiSelect" style="display:none; margin-top:16px;">
+            <span class="ea-label">Select Dindis <span id="dindiSelCount" style="font-weight:400;color:#7a6d54;"></span></span>
+            <select class="ea-select" id="dindiSelectBox" multiple size="7" onchange="onDindiSelect()" style="height:auto;">
+                <optgroup label="Jejuri Region (18 leaders)">
+                    <option value="J01" data-phone="mock">Dindi 3 — Bhosale Dindi</option>
+                    <option value="J02" data-phone="mock">Dindi 7 — More Dindi</option>
+                    <option value="J03" data-phone="mock">Dindi 12 — Patil Dindi</option>
+                    <option value="J04" data-phone="mock">Dindi 15 — Jadhav Dindi</option>
+                    <option value="J05" data-phone="mock">Dindi 19 — Shinde Dindi</option>
+                </optgroup>
+                <optgroup label="Alandi Region (24 leaders)">
+                    <option value="A01" data-phone="mock">Dindi 22 — Kadam Dindi</option>
+                    <option value="A02" data-phone="mock">Dindi 28 — Gaikwad Dindi</option>
+                    <option value="A03" data-phone="mock">Dindi 33 — Deshmukh Dindi</option>
+                    <option value="A04" data-phone="mock">Dindi 37 — Kale Dindi</option>
+                    <option value="A05" data-phone="mock">Dindi 41 — Mane Dindi</option>
+                </optgroup>
+                <optgroup label="Saswad Region (15 leaders)">
+                    <option value="S01" data-phone="mock">Dindi 44 — Salunkhe Dindi</option>
+                    <option value="S02" data-phone="mock">Dindi 50 — Chavan Dindi</option>
+                    <option value="S03" data-phone="mock">Dindi 55 — Waghmare Dindi</option>
+                    <option value="S04" data-phone="mock">Dindi 58 — Tukaram Dindi</option>
+                </optgroup>
+                <optgroup label="Wakhari Region (21 leaders)">
+                    <option value="W01" data-phone="mock">Dindi 47 — Wakhari Dindi</option>
+                    <option value="W02" data-phone="mock">Dindi 60 — Nimbalkar Dindi</option>
+                    <option value="W03" data-phone="mock">Dindi 63 — Natepute Dindi</option>
+                    <option value="W04" data-phone="mock">Dindi 67 — Londhe Dindi</option>
+                    <option value="W05" data-phone="mock">Dindi 71 — Thorat Dindi</option>
+                </optgroup>
+            </select>
+            <p style="font-size:12px;color:#8a7d63;margin:6px 0 0;">Hold Ctrl / ⌘ to select multiple Dindis</p>
+        </div>
+
+        <!-- Zone picker -->
+        <div class="ea-field" id="regionSelect" style="display:none; margin-top:16px;">
+            <span class="ea-label">Select region</span>
+            <select class="ea-select" onchange="updateRegion(this.value)">
+                <option value="jejuri">Jejuri Region</option>
+                <option value="alandi">Alandi Region</option>
+                <option value="saswad">Saswad Region</option>
+                <option value="wakhari">Wakhari Region</option>
+            </select>
+            <div class="ea-region-box">
+                <div class="ea-region-title">📍 Jejuri Region detected</div>
+                <div class="ea-region-info">VariMitra checks recent Dindi Leader check-ins to identify relevant leaders.</div>
+                <div class="ea-region-count">
+                    <span>Leaders currently relevant</span>
+                    <strong id="regionLeaderCount">18</strong>
+                </div>
+            </div>
+        </div>
+
+        <button class="ea-btn-primary" onclick="nav(2)">Continue to Alert →</button>
+    </div>
+
+    <!-- ══════════════════════════════════════════════ -->
+    <!-- SCREEN 2 — COMPOSE MESSAGE                    -->
+    <!-- ══════════════════════════════════════════════ -->
+    <div class="ea-screen" id="eaScreen2">
+
+        <button class="ea-back" onclick="nav(1)">← Back</button>
+        <h2 class="ea-title">Compose Alert</h2>
+        <p class="ea-subtitle">Choose a template, set the location detail, then send.</p>
+
+        <div class="ea-field">
+            <span class="ea-label">Emergency template</span>
+            <div class="ea-template-grid">
+                <div class="ea-template selected" onclick="chooseTemplate('flood',this)">🌧 Flood / Weather</div>
+                <div class="ea-template" onclick="chooseTemplate('accident',this)">🚑 Accident</div>
+                <div class="ea-template" onclick="chooseTemplate('reroute',this)">↪ Reroute</div>
+                <div class="ea-template" onclick="chooseTemplate('hazard',this)">⚠ Hazard Ahead</div>
+                <div class="ea-template" onclick="chooseTemplate('other',this)">📝 Other</div>
+            </div>
+        </div>
+
+        <!-- Custom message (for "Other") -->
+        <div class="ea-field" id="customMsgField" style="display:none;">
+            <span class="ea-label">Custom message (English)</span>
+            <textarea class="ea-input" id="customMsgEN" rows="3" placeholder="Type your custom emergency message in English…" oninput="updatePreview()" style="resize:none;"></textarea>
+            <span class="ea-label" style="margin-top:12px;">Custom message (Marathi)</span>
+            <textarea class="ea-input" id="customMsgMR" rows="3" placeholder="मराठीत कस्टम संदेश टाइप करा…" oninput="updatePreview()" style="resize:none;"></textarea>
+        </div>
+
+        <div class="ea-field">
+            <span class="ea-label">Specific location / detail</span>
+            <div class="ea-location-wrap">
+                <input class="ea-input" id="customDetail" value="Nira Bridge"
+                    oninput="locationSearch(this.value); updatePreview();"
+                    placeholder="e.g. Nira Bridge, Jejuri Road…"
+                    autocomplete="off">
+                <div class="ea-location-results" id="locationResults"></div>
+            </div>
+        </div>
+
+        <div class="ea-preview">
+            <div class="ea-preview-label">English preview</div>
+            <div class="ea-preview-text" id="englishPreview">Flood warning: Nira Bridge is closed. Halt immediately and await instructions from your Dindi Leader.</div>
+            <div class="ea-preview-label">Marathi preview</div>
+            <div class="ea-preview-text" id="marathiPreview">पूर सूचना: नीरा पूल बंद आहे. त्वरित थांबा आणि तुमच्या दिंडी प्रमुखांच्या सूचनांची वाट पहा.</div>
+        </div>
+
+        <div class="ea-field">
+            <span class="ea-label">Delivery channels</span>
+            <div class="ea-channel-row">
+                <div class="ea-channel-chip on" id="chipSMS" onclick="toggleChannel('SMS')">📱 SMS</div>
+                <div class="ea-channel-chip on" id="chipWA" onclick="toggleChannel('WA')">💬 WhatsApp</div>
+            </div>
+        </div>
+
+        <button class="ea-btn-danger" onclick="sendAlert()">🚨 Send Emergency Alert</button>
+    </div>
+
+    <!-- ══════════════════════════════════════════════ -->
+    <!-- SCREEN 3 — DELIVERY STATUS                    -->
+    <!-- ══════════════════════════════════════════════ -->
+    <div class="ea-screen" id="eaScreen3">
+
+        <button class="ea-back" onclick="nav(2)">← Back</button>
+
+        <div class="ea-success-head">
+            <div class="ea-success-icon">✓</div>
+            <div>
+                <h2 class="ea-title" style="margin-bottom:4px;">Alert Dispatched</h2>
+                <p class="ea-subtitle" style="margin:0;">Leader-first delivery in progress.</p>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="ea-stat-card">
+            <div class="ea-stat-row">
+                <span>Targeted Leaders</span>
+                <span class="ea-stat-num" id="statTargeted">—</span>
+            </div>
+            <div class="ea-stat-row">
+                <span>Delivered</span>
+                <span class="ea-stat-num" id="statDelivered" style="color:var(--sage);">—</span>
+            </div>
+            <div class="ea-stat-row">
+                <span>Pending</span>
+                <span class="ea-stat-num" id="statPending" style="color:#9A6717;">—</span>
+            </div>
+            <div class="ea-bar">
+                <div class="ea-bar-fill" id="statBarFill"></div>
+            </div>
+            <p style="font-size:13px;color:#7a6d54;margin:4px 0 0;" id="statPercent"></p>
+        </div>
+
+        <!-- Channel breakdown -->
+        <div class="ea-stat-card">
+            <span class="ea-label">Delivery channels</span>
+            <div class="ea-channel-stat">
+                <div class="ea-channel-box"><b>SMS</b><span id="smsStat">—</span></div>
+                <div class="ea-channel-box"><b>WhatsApp</b><span id="waStat">—</span></div>
+            </div>
+        </div>
+
+        <!-- Leader receipts -->
+        <div class="ea-stat-card">
+            <span class="ea-label">Leader receipts</span>
+            <div class="ea-leader-list" id="receiptsList">
+                <div style="padding:20px; text-align:center; color:#666; font-size:14px;">
+                    Dispatching alerts... please wait.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</main>
+</div>
+
+<script type="module">
+import { db } from './js/config.js';
+import { collection, getDocs, query } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* ── State ──────────────────────────────────────── */
+let currentScreen = 1;
+let target   = 'all';
+let template = 'flood';
+let demoMode = 'mock';
+let channels = { SMS: true, WA: true };
+let liveDindis = []; // Store real data here
+
+/* ── Mock data (consistent across all fields) ────── */
+const MOCK_DATA = {
+    regions: { jejuri: 18, alandi: 24, saswad: 15, wakhari: 21 },
+    total: 78,   // sum: 18+24+15+21
+    deliveryRate: 0.88
+};
+
+/* ── Templates ───────────────────────────────────── */
+const TEMPLATES = {
+    flood:    { en: "Flood warning: {d} is closed. Halt immediately and await instructions from your Dindi Leader.",      mr: "पूर सूचना: {d} बंद आहे. त्वरित थांबा आणि तुमच्या दिंडी प्रमुखांच्या सूचनांची वाट पहा." },
+    accident: { en: "Accident ahead at {d}. Halt immediately and follow instructions from your Dindi Leader.",             mr: "{d} येथे पुढे अपघात झाला आहे. त्वरित थांबा आणि दिंडी प्रमुखांच्या सूचनांचे पालन करा." },
+    reroute:  { en: "Route change: {d}. Do not proceed on the current route. Follow your Dindi Leader's new directions.",  mr: "मार्ग बदल: {d}. सध्याच्या मार्गावर पुढे जाऊ नका. दिंडी प्रमुखांनी दिलेल्या नवीन मार्गाचे पालन करा." },
+    hazard:   { en: "Hazard ahead: {d}. Halt immediately and stay with your Dindi group.",                                mr: "पुढे धोका: {d}. त्वरित थांबा आणि आपल्या दिंडीसोबतच रहा." },
+    other:    { en: null, mr: null }
+};
+
+/* ── Boot ─────────────────────────────────────────── */
+function boot() {
+    updateDots(1);
+    refreshDindiCount();
+}
+
+/* ── Refresh count badge based on mode ─────────────── */
+function refreshDindiCount() {
+    if (demoMode === 'mock') {
+        document.getElementById('totalDindiCount').textContent = MOCK_DATA.total;
+        populateMockDindis();
+        populateMockRegions();
+    } else {
+        document.getElementById('totalDindiCount').textContent = 'Loading…';
+        loadLiveDindis();
+    }
+}
+
+/* ── Live Data Loading ────────────────────────────── */
+async function loadLiveDindis() {
+    try {
+        const snap = await getDocs(collection(db, 'users'));
+        liveDindis = [];
+        snap.forEach(d => { 
+            const data = d.data();
+            if (data.role === 'dindi_leader') {
+                liveDindis.push({ id: d.id, ...data });
+            }
+        });
+        document.getElementById('totalDindiCount').textContent = liveDindis.length;
+        populateLiveDindis();
+        populateLiveRegions();
+    } catch(e) {
+        document.getElementById('totalDindiCount').textContent = '—';
+    }
+}
+
+/* ── Populate Dindi / Region Pickers ──────────────── */
+function populateMockDindis() {
+    const sel = document.getElementById('dindiSelectBox');
+    sel.innerHTML = `
+        <optgroup label="Jejuri Region (18 leaders)">
+            <option value="J01" data-phone="mock">Dindi 3 — Bhosale Dindi</option>
+            <option value="J02" data-phone="mock">Dindi 7 — More Dindi</option>
+            <option value="J03" data-phone="mock">Dindi 12 — Patil Dindi</option>
+            <option value="J04" data-phone="mock">Dindi 15 — Jadhav Dindi</option>
+            <option value="J05" data-phone="mock">Dindi 19 — Shinde Dindi</option>
+        </optgroup>
+        <optgroup label="Alandi Region (24 leaders)">
+            <option value="A01" data-phone="mock">Dindi 22 — Kadam Dindi</option>
+            <option value="A02" data-phone="mock">Dindi 28 — Gaikwad Dindi</option>
+            <option value="A03" data-phone="mock">Dindi 33 — Deshmukh Dindi</option>
+            <option value="A04" data-phone="mock">Dindi 37 — Kale Dindi</option>
+            <option value="A05" data-phone="mock">Dindi 41 — Mane Dindi</option>
+        </optgroup>
+        <optgroup label="Saswad Region (15 leaders)">
+            <option value="S01" data-phone="mock">Dindi 44 — Salunkhe Dindi</option>
+            <option value="S02" data-phone="mock">Dindi 50 — Chavan Dindi</option>
+            <option value="S03" data-phone="mock">Dindi 55 — Waghmare Dindi</option>
+            <option value="S04" data-phone="mock">Dindi 58 — Tukaram Dindi</option>
+        </optgroup>
+        <optgroup label="Wakhari Region (21 leaders)">
+            <option value="W01" data-phone="mock">Dindi 47 — Wakhari Dindi</option>
+            <option value="W02" data-phone="mock">Dindi 60 — Nimbalkar Dindi</option>
+            <option value="W03" data-phone="mock">Dindi 63 — Natepute Dindi</option>
+            <option value="W04" data-phone="mock">Dindi 67 — Londhe Dindi</option>
+            <option value="W05" data-phone="mock">Dindi 71 — Thorat Dindi</option>
+        </optgroup>`;
+    onDindiSelect();
+}
+
+function populateMockRegions() {
+    const sel = document.querySelector('#regionSelect select');
+    sel.innerHTML = `
+        <option value="jejuri">Jejuri Region</option>
+        <option value="alandi">Alandi Region</option>
+        <option value="saswad">Saswad Region</option>
+        <option value="wakhari">Wakhari Region</option>`;
+    if(sel.options.length > 0) updateRegion(sel.options[0].value);
+}
+
+function populateLiveDindis() {
+    const sel = document.getElementById('dindiSelectBox');
+    sel.innerHTML = '';
+    const groups = {};
+    liveDindis.forEach(d => {
+        const v = d.villageName || 'Other';
+        if (!groups[v]) groups[v] = [];
+        groups[v].push(d);
+    });
+    
+    for (const [village, dindis] of Object.entries(groups)) {
+        const optgroup = document.createElement('optgroup');
+        optgroup.label = `${village} Region (${dindis.length} leaders)`;
+        dindis.forEach(d => {
+            const opt = document.createElement('option');
+            opt.value = d.id;
+            opt.textContent = `${d.dindiName || 'Unknown Dindi'} (${d.name || 'Unknown'})`;
+            opt.dataset.phone = d.username || d.phone || ''; // Important for live sending
+            optgroup.appendChild(opt);
+        });
+        sel.appendChild(optgroup);
+    }
+    onDindiSelect();
+}
+
+function populateLiveRegions() {
+    const sel = document.querySelector('#regionSelect select');
+    sel.innerHTML = '';
+    const groups = {};
+    liveDindis.forEach(d => {
+        const v = d.villageName || 'Other';
+        groups[v] = (groups[v] || 0) + 1;
+    });
+    
+    for (const [village, count] of Object.entries(groups)) {
+        const opt = document.createElement('option');
+        opt.value = village;
+        opt.textContent = `${village} Region`;
+        sel.appendChild(opt);
+    }
+    if (sel.options.length > 0) updateRegion(sel.options[0].value);
+}
+
+/* ── Track specific Dindi selection count ───────────── */
+function onDindiSelect() {
+    const sel   = document.getElementById('dindiSelectBox');
+    const count = sel ? Array.from(sel.selectedOptions).length : 0;
+    const label = document.getElementById('dindiSelCount');
+    if (label) label.textContent = count > 0 ? `(${count} selected)` : '';
+}
+
+/* ── Dots ────────────────────────────────────────── */
+function updateDots(n) {
+    const cont = document.getElementById('eaDots');
+    cont.innerHTML = '';
+    for (let i = 1; i <= 3; i++) {
+        const d = document.createElement('div');
+        d.className = 'ea-dot' + (i <= n ? ' on' : '');
+        cont.appendChild(d);
+    }
+}
+
+/* ── Navigate ────────────────────────────────────── */
+function nav(n) {
+    currentScreen = n;
+    document.querySelectorAll('.ea-screen').forEach((s, i) => {
+        s.classList.toggle('active', i + 1 === n);
+    });
+    updateDots(n);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ── Mode toggle ─────────────────────────────────── */
+function setMode(m) {
+    demoMode = m;
+    document.getElementById('btnMock').classList.toggle('active', m === 'mock');
+    document.getElementById('btnLive').classList.toggle('active', m === 'live');
+    if (m === 'live') {
+        document.getElementById('btnLive').style.cssText = 'background:var(--vermilion);color:#fff;';
+        document.getElementById('btnMock').style.cssText = '';
+    } else {
+        document.getElementById('btnMock').style.cssText = 'background:var(--night);color:#fff;';
+        document.getElementById('btnLive').style.cssText = '';
+    }
+    refreshDindiCount();
+}
+
+/* ── Target ──────────────────────────────────────── */
+function selectTarget(t) {
+    target = t;
+    document.querySelectorAll('.ea-option').forEach(o => o.classList.remove('selected'));
+    const map = { all: 'targetAll', dindi: 'targetDindi', zone: 'targetZone' };
+    document.getElementById(map[t]).classList.add('selected');
+    document.getElementById('dindiSelect').style.display  = t === 'dindi' ? 'block' : 'none';
+    document.getElementById('regionSelect').style.display = t === 'zone'  ? 'block' : 'none';
+    document.getElementById('allDindiCount').style.display = t === 'all'  ? 'block' : 'none';
+}
+
+/* ── Region ──────────────────────────────────────── */
+function updateRegion(v) {
+    if (demoMode === 'live') {
+        const count = liveDindis.filter(d => (d.villageName || 'Other') === v).length;
+        document.querySelector('.ea-region-title').textContent = '📍 ' + v + ' Region detected';
+        document.getElementById('regionLeaderCount').textContent = count;
+    } else {
+        const counts = { jejuri:18, alandi:24, saswad:15, wakhari:21 };
+        const displayV = v.charAt(0).toUpperCase() + v.slice(1);
+        document.querySelector('.ea-region-title').textContent = '📍 ' + displayV + ' Region detected';
+        document.getElementById('regionLeaderCount').textContent = counts[v] || '—';
+    }
+}
+
+/* ── Template ────────────────────────────────────── */
+function chooseTemplate(t, el) {
+    template = t;
+    document.querySelectorAll('.ea-template').forEach(e => e.classList.remove('selected'));
+    el.classList.add('selected');
+    document.getElementById('customMsgField').style.display = t === 'other' ? 'block' : 'none';
+    updatePreview();
+}
+
+/* ── Channel ─────────────────────────────────────── */
+function toggleChannel(ch) {
+    channels[ch] = !channels[ch];
+    document.getElementById('chip' + ch).classList.toggle('on', channels[ch]);
+}
+
+/* ── Location search ─────────────────────────────── */
+let _searchTimer;
+async function locationSearch(val) {
+    clearTimeout(_searchTimer);
+    const res = document.getElementById('locationResults');
+    if (!val || val.length < 3) { res.style.display = 'none'; return; }
+    _searchTimer = setTimeout(async () => {
+        try {
+            const data = await (await fetch(
+                `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(val + ', Maharashtra')}&format=json&limit=6&countrycodes=in`
+            )).json();
+            if (!data.length) { res.style.display = 'none'; return; }
+            res.innerHTML = data.map(p => {
+                const name = p.display_name.substring(0, 70);
+                return `<div class="ea-location-item" onclick="pickLocation('${p.display_name.split(',')[0]}')">${name}</div>`;
+            }).join('');
+            res.style.display = 'block';
+        } catch(e) { res.style.display = 'none'; }
+    }, 400);
+}
+
+function pickLocation(name) {
+    document.getElementById('customDetail').value = name;
+    document.getElementById('locationResults').style.display = 'none';
+    updatePreview();
+}
+
+/* ── Preview ─────────────────────────────────────── */
+function updatePreview() {
+    const d  = document.getElementById('customDetail').value.trim() || 'the affected location';
+    let en, mr;
+    if (template === 'other') {
+        en = (document.getElementById('customMsgEN').value || '').trim() || '[Custom message not entered]';
+        mr = (document.getElementById('customMsgMR').value || '').trim() || '[Custom message not entered]';
+    } else {
+        en = TEMPLATES[template].en.replace('{d}', d);
+        mr = TEMPLATES[template].mr.replace('{d}', d);
+    }
+    document.getElementById('englishPreview').textContent = en;
+    document.getElementById('marathiPreview').textContent = mr;
+}
+
+/* ── Send ────────────────────────────────────────── */
+async function sendAlert() {
+    updatePreview();
+    nav(3);
+
+    const now = new Date();
+
+    let phones = [];
+    let targetDindis = [];
+    let actualTargetedCount = 0;
+
+    if (demoMode === 'live') {
+        // Collect targeted phone numbers based on selection
+        if (target === 'all') {
+            targetDindis = liveDindis.filter(d => (d.username || d.phone) && String(d.username || d.phone).length > 5);
+        } else if (target === 'zone') {
+            const sel = document.querySelector('#regionSelect select');
+            const region = sel ? sel.value : '';
+            targetDindis = liveDindis.filter(d => (d.villageName || 'Other') === region && (d.username || d.phone) && String(d.username || d.phone).length > 5);
+        } else if (target === 'dindi') {
+            const sel = document.getElementById('dindiSelectBox');
+            if (sel) {
+                const selectedIds = Array.from(sel.selectedOptions).map(opt => opt.value);
+                targetDindis = liveDindis.filter(d => selectedIds.includes(d.id) && (d.username || d.phone) && String(d.username || d.phone).length > 5);
+            }
+        }
         
-        const templates = {
-            'flood': {
-                en: "⚠️ URGENT: Flood warning issued for your current route. Please move to higher ground immediately.",
-                mr: "⚠️ तातडीचे: तुमच्या सध्याच्या मार्गावर पुराचा इशारा देण्यात आला आहे. कृपया तात्काळ सुरक्षित स्थळी जा."
-            },
-            'accident': {
-                en: "⚠️ ALERT: Major road accident reported ahead. Expect severe delays.",
-                mr: "⚠️ अलर्ट: पुढे मोठा रस्ते अपघात झाल्याचे वृत्त आहे. प्रवासास विलंब होऊ शकतो."
-            },
-            'route': {
-                en: "🔄 NOTICE: Route has been temporarily changed due to unforeseen circumstances. Follow police directions.",
-                mr: "🔄 सूचना: काही अपरिहार्य कारणास्तव मार्ग तात्पुरता बदलण्यात आला आहे. पोलिसांच्या सूचनांचे पालन करा."
-            },
-            'camp': {
-                en: "⛺ UPDATE: The upcoming resting camp is closed. Proceed to the next designated area.",
-                mr: "⛺ अपडेट: पुढील मुक्काम बंद आहे. कृपया पुढच्या निर्धारित ठिकाणी जा."
-            }
-        };
+        actualTargetedCount = targetDindis.length;
+        if (targetDindis.length > 5) targetDindis = targetDindis.slice(0, 5); // Hackathon constraint: max 5 real SMS
+        phones = targetDindis.map(d => d.username || d.phone);
+    }
 
-        function setMode(mode) {
-            currentMode = mode;
-            document.getElementById('mode-mock').classList.toggle('active', mode === 'mock');
-            document.getElementById('mode-live').classList.toggle('active', mode === 'live');
-            
-            const dispatchBtn = document.getElementById('dispatch-btn');
-            if(mode === 'live') {
-                dispatchBtn.style.backgroundColor = '#8B0000'; // Darker red for live
-                dispatchBtn.innerText = 'DISPATCH LIVE ALERT (DANGER)';
+    try {
+        const res = await fetch('http://localhost:3000/api/alerts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                target, template, mode: demoMode, channels,
+                detail:    document.getElementById('customDetail').value,
+                messageEn: document.getElementById('englishPreview').textContent,
+                messageMr: document.getElementById('marathiPreview').textContent,
+                phoneNumbers: phones,
+                targetedCount: actualTargetedCount
+            })
+        });
+        
+        if (res.ok) {
+            if (demoMode === 'mock') {
+                showMockStats();
             } else {
-                dispatchBtn.style.backgroundColor = 'var(--vermilion)';
-                dispatchBtn.innerText = 'Dispatch Alert (Mock Mode)';
+                const data = await res.json();
+                showStats(data.targeted, data.delivered, data.pending);
+                renderReceipts(targetDindis);
+            }
+        } else { 
+            const err = await res.json().catch(()=>({}));
+            if (demoMode === 'live') {
+                alert('Live delivery failed: ' + (err.error || 'Server error'));
+                document.getElementById('statTargeted').textContent = 'ERROR';
+                document.getElementById('statPercent').textContent = 'API Error - Check console';
+                document.getElementById('receiptsList').innerHTML = `<div style="padding:20px; color:#d93025; font-size:14px; text-align:center;">Failed to dispatch: ${err.error || 'Unknown error'}</div>`;
+            } else {
+                showMockStats();
             }
         }
-
-        function updatePreview() {
-            const templateKey = document.getElementById('template').value;
-            const customDetails = document.getElementById('custom-details').value.trim();
-            const previewBox = document.getElementById('preview-text');
-
-            if (!templateKey) {
-                previewBox.innerText = "Select a template to generate the alert message...";
-                return;
-            }
-
-            const baseMsg = templates[templateKey];
-            let finalMsg = `${baseMsg.mr}\n\n${baseMsg.en}`;
-            
-            if (customDetails) {
-                finalMsg += `\n\nDetails / तपशील:\n${customDetails}`;
-            }
-            
-            previewBox.innerText = finalMsg;
+    } catch(e) {
+        console.warn('API unavailable, showing mock stats');
+        if (demoMode === 'live') {
+            alert('Live SMS failed: API completely unreachable.');
+            document.getElementById('statTargeted').textContent = 'ERROR';
+            document.getElementById('receiptsList').innerHTML = `<div style="padding:20px; color:#d93025; font-size:14px; text-align:center;">Server is down or unreachable.</div>`;
+        } else {
+            showMockStats();
         }
+    }
+}
 
-        function dispatchAlert() {
-            const templateKey = document.getElementById('template').value;
-            if (!templateKey) {
-                alert("Please select a template first.");
-                return;
-            }
+function renderReceipts(dindis) {
+    const list = document.getElementById('receiptsList');
+    if (!list) return;
+    
+    list.innerHTML = '';
+    
+    if (dindis.length === 0) {
+        list.innerHTML = '<div style="padding:16px;color:#999;font-size:14px;text-align:center;">No eligible leaders with valid phone numbers found.</div>';
+        return;
+    }
+    
+    dindis.forEach(d => {
+        const name = d.name || 'Unknown';
+        const avatar = name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase() || 'DL';
+        const meta = `${d.dindiName || 'Dindi'} • ${d.villageName || 'Unknown'}`;
+        
+        list.innerHTML += `
+            <div class="ea-leader">
+                <div class="ea-leader-left">
+                    <div class="ea-avatar">${avatar}</div>
+                    <div><div class="ea-leader-name">${name}</div><div class="ea-leader-meta">${meta}</div></div>
+                </div>
+                <div class="ea-receipt">Delivered ✓</div>
+            </div>
+        `;
+    });
+}
 
-            const audience = document.getElementById('audience');
-            document.getElementById('receipt-audience').innerText = audience.options[audience.selectedIndex].text;
+function showStats(targeted, delivered, pending) {
+    document.getElementById('statTargeted').textContent  = targeted;
+    document.getElementById('statDelivered').textContent = delivered;
+    document.getElementById('statPending').textContent   = pending;
+    const pct = targeted > 0 ? Math.floor((delivered / targeted) * 100) : 0;
+    document.getElementById('statBarFill').style.width   = pct + '%';
+    document.getElementById('statPercent').textContent   = pct + '% leader delivery confirmed';
+    document.getElementById('smsStat').textContent  = channels.SMS ? `${delivered} / ${targeted} ✓` : 'Disabled';
+    document.getElementById('waStat').textContent   = channels.WA  ? `${delivered} / ${targeted} ✓` : 'Disabled';
+}
 
-            // Switch Views
-            document.getElementById('compose-view').style.display = 'none';
-            document.getElementById('receipt-view').style.display = 'block';
+/* ── Context-aware mock stats ────────────────────── */
+function showMockStats() {
+    let targeted;
+    if (target === 'all') {
+        targeted = MOCK_DATA.total; // 78
+    } else if (target === 'zone') {
+        const sel = document.querySelector('#regionSelect select');
+        const region = sel ? sel.value : 'jejuri';
+        targeted = MOCK_DATA.regions[region] || 18;
+    } else if (target === 'dindi') {
+        const sel = document.getElementById('dindiSelectBox');
+        const count = sel ? Array.from(sel.selectedOptions).length : 0;
+        targeted = count || 1; // at least 1 if nothing selected
+    } else {
+        targeted = MOCK_DATA.total;
+    }
+    const delivered = Math.round(targeted * MOCK_DATA.deliveryRate);
+    const pending   = targeted - delivered;
+    showStats(targeted, delivered, pending);
+    
+    // Reset mock receipts
+    const list = document.getElementById('receiptsList');
+    if (list) {
+        list.innerHTML = `
+            <div class="ea-leader">
+                <div class="ea-leader-left">
+                    <div class="ea-avatar">SP</div>
+                    <div><div class="ea-leader-name">Suresh Patil</div><div class="ea-leader-meta">Dindi 47 • Wakhari</div></div>
+                </div>
+                <div class="ea-receipt">Delivered ✓</div>
+            </div>
+            <div class="ea-leader">
+                <div class="ea-leader-left">
+                    <div class="ea-avatar">RK</div>
+                    <div><div class="ea-leader-name">Ramesh Kadam</div><div class="ea-leader-meta">Dindi 12 • Jejuri</div></div>
+                </div>
+                <div class="ea-receipt">Delivered ✓</div>
+            </div>
+            <div class="ea-leader">
+                <div class="ea-leader-left">
+                    <div class="ea-avatar">VM</div>
+                    <div><div class="ea-leader-name">Vilas More</div><div class="ea-leader-meta">Dindi 58 • Saswad</div></div>
+                </div>
+                <div class="ea-receipt" style="background:#FFF0D5;color:#9A6717;">Pending</div>
+            </div>`;
+    }
+}
 
-            // Simulate dispatch progress
-            const totalTarget = Math.floor(Math.random() * 50) + 20; // 20 to 70 targets
-            document.getElementById('stat-targeted').innerText = totalTarget;
-            document.getElementById('stat-delivered').innerText = '0';
-            document.getElementById('stat-pending').innerText = totalTarget;
-            
-            let delivered = 0;
-            const progressBar = document.getElementById('progress-bar');
-            
-            const interval = setInterval(() => {
-                delivered += Math.floor(Math.random() * 5) + 1;
-                if (delivered >= totalTarget) {
-                    delivered = totalTarget;
-                    clearInterval(interval);
-                    
-                    document.getElementById('dispatch-status').innerText = 'Completed';
-                    document.getElementById('dispatch-status').style.backgroundColor = 'var(--marigold-deep)';
-                }
-                
-                document.getElementById('stat-delivered').innerText = delivered;
-                document.getElementById('stat-pending').innerText = totalTarget - delivered;
-                
-                const percentage = (delivered / totalTarget) * 100;
-                progressBar.style.width = `${percentage}%`;
-                
-            }, 300);
-        }
+/* ── Window exports (MUST be after all function defs) ── */
+window.nav            = nav;
+window.setMode        = setMode;
+window.selectTarget   = selectTarget;
+window.updateRegion   = updateRegion;
+window.chooseTemplate = chooseTemplate;
+window.toggleChannel  = toggleChannel;
+window.locationSearch = locationSearch;
+window.pickLocation   = pickLocation;
+window.updatePreview  = updatePreview;
+window.sendAlert      = sendAlert;
+window.onDindiSelect  = onDindiSelect;
 
-        function resetView() {
-            document.getElementById('receipt-view').style.display = 'none';
-            document.getElementById('compose-view').style.display = 'block';
-            document.getElementById('progress-bar').style.width = '0%';
-            document.getElementById('dispatch-status').innerText = 'In Progress';
-            document.getElementById('dispatch-status').style.backgroundColor = 'var(--sage)';
-            
-            document.getElementById('template').value = '';
-            document.getElementById('custom-details').value = '';
-            updatePreview();
-        }
-
-        // Initialize defaults
-        setMode('mock');
-    </script>
+/* ── Init ────────────────────────────────────────── */
+boot();
+</script>
 </body>
 </html>

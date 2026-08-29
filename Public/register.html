@@ -4,200 +4,259 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VariMitra - Register</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="CSS/style.css">
     <style>
-        body {
-            background: radial-gradient(circle, var(--night-2) 0%, var(--night) 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 24px;
-            box-sizing: border-box;
-            position: relative; /* Added for lang-container */
-        }
-        .lang-container {
-            position: absolute;
-            top: 24px;
-            right: 24px;
-        }
-        .register-card {
-            width: 100%;
-            max-width: 500px;
-            text-align: center;
+        body { 
+            margin: 0; padding: 24px; font-family: 'Inter', sans-serif; 
+            background: linear-gradient(135deg, var(--night-2), var(--night));
+            min-height: 100vh; display: flex; align-items: center; justify-content: center;
             box-sizing: border-box;
         }
+
+        .langtoggle { position: absolute; top: 24px; right: 24px; }
+
+        .register-wrapper {
+            background: var(--paper);
+            max-width: 600px; width: 100%;
+            border-radius: 16px; padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            box-sizing: border-box;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header-area { text-align: center; margin-bottom: 32px; }
+        .wordmark { font-size: 32px; margin-bottom: 8px; }
+        .subtitle { font-size: 15px; color: #7a6d54; }
+
         .tabs {
-            display: flex;
-            margin-bottom: 24px;
-            border-bottom: 2px solid var(--line);
+            display: flex; margin-bottom: 32px; border-bottom: 2px solid var(--line);
         }
         .tab-btn {
-            flex: 1;
-            background: transparent;
-            border: none;
-            padding: 12px 8px;
-            font-family: inherit;
-            font-weight: 600;
-            color: var(--sage);
-            cursor: pointer;
-            border-bottom: 3px solid transparent;
-            margin-bottom: -2px;
+            flex: 1; background: transparent; border: none; padding: 16px 8px;
+            font-family: inherit; font-size: 14px; font-weight: 500; color: #8A7D63;
+            cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px;
             transition: all 0.2s ease;
-            font-size: 14px;
         }
         .tab-btn.active {
-            color: var(--night);
-            border-bottom-color: var(--marigold-deep);
+            color: var(--ink); border-bottom-color: var(--marigold); font-weight: 700;
         }
         .tab-content {
-            display: none;
-            text-align: left;
+            display: none; opacity: 0; transition: opacity 0.2s ease;
         }
         .tab-content.active {
-            display: block;
+            display: block; opacity: 1;
         }
-        .form-group {
-            margin-bottom: 16px;
+
+        .form-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
         }
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            font-size: 14px;
+        .full-width { grid-column: 1 / -1; }
+
+        .input-group { position: relative; }
+        
+        .floating-input {
+            width: 100%; padding: 24px 16px 8px; border: 1.5px solid var(--line); border-radius: 12px;
+            font-size: 15px; background: #fff; outline: none; transition: all 0.2s; box-sizing: border-box;
+            color: var(--ink); font-family: inherit;
         }
-        select.input-field {
-            appearance: none;
+        /* Select doesn't support :placeholder-shown cleanly, so slightly different handling */
+        select.floating-input { padding: 16px; }
+        
+        .floating-input:focus {
+            border-color: var(--marigold); box-shadow: 0 0 0 3px rgba(230, 172, 39, 0.2);
         }
-        .submit-btn {
-            width: 100%;
-            margin-top: 16px;
+        
+        .floating-label {
+            position: absolute; left: 16px; top: 16px; font-size: 15px; color: #8A7D63;
+            pointer-events: none; transition: all 0.2s ease;
         }
+        
+        .floating-input:focus ~ .floating-label,
+        .floating-input:not(:placeholder-shown) ~ .floating-label {
+            top: 6px; font-size: 11px; font-weight: 600; color: var(--marigold-deep);
+        }
+
+        .photo-upload {
+            border: 2px dashed var(--line); border-radius: 12px; padding: 24px 16px; 
+            text-align: center; cursor: pointer; transition: all 0.2s; background: #fff;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .photo-upload:hover { border-color: var(--marigold); background: #FFFDF8; }
+        .photo-upload input { display: none; }
+        .photo-preview { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; margin-top: 12px; display: none; }
+        .photo-label-text { font-size: 14px; color: #8A7D63; font-weight: 500; }
+
+        .btn-signin {
+            width: 100%; height: 50px; background-color: var(--night); color: white;
+            border: none; border-radius: 12px; font-size: 16px; font-weight: 600;
+            font-family: inherit; cursor: pointer; margin-top: 24px;
+            transition: background-color 0.2s, transform 0.1s;
+            display: flex; align-items: center; justify-content: center; position: relative;
+        }
+        .btn-signin:hover { background-color: var(--night-2); }
+        .btn-signin:active { transform: scale(0.98); }
+
+        .btn-spinner {
+            display: none; width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .btn-signin.loading .btn-text { display: none; }
+        .btn-signin.loading .btn-spinner { display: block; }
+        .btn-signin.loading::after { content: 'Creating Account...'; display: block; font-size: 15px; margin-left: 10px; }
+
         .login-link {
-            display: inline-block;
-            margin-top: 24px;
-            font-size: 14px;
-            color: var(--night);
-            text-decoration: none;
-            font-weight: 600;
+            display: block; text-align: center; margin-top: 24px; color: var(--sage);
+            text-decoration: none; font-size: 14px; font-weight: 600; transition: color 0.2s;
         }
-        .login-link:hover {
-            text-decoration: underline;
+        .login-link:hover { color: var(--marigold-deep); }
+
+        @media (max-width: 600px) {
+            .register-wrapper { padding: 24px; }
+            .form-grid { grid-template-columns: 1fr; gap: 12px; }
+            .tabs { margin-bottom: 24px; }
+            .tab-btn { padding: 12px 4px; font-size: 13px; }
         }
     </style>
 </head>
 <body>
-    <div class="lang-container">
-        <div class="langtoggle">
-            <button id="btnEN" class="active">EN</button>
-            <button id="btnMR">MR</button>
-        </div>
+    <div class="langtoggle">
+        <button id="btnEN" class="active">EN</button>
+        <button id="btnMR">मरा</button>
     </div>
 
-    <div class="card register-card">
-        <div class="wordmark" style="font-size: 28px; margin-bottom: 24px;"><span data-i18n="reg_title">VariMitra Registration</span></div>
+    <div class="register-wrapper">
+        <div class="header-area">
+            <div class="wordmark">Vari<span>Mitra</span></div>
+            <div class="subtitle">Join the Wari Network</div>
+        </div>
         
         <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab(event, 'dindi')" data-i18n="reg_tab_dindi">Dindi Leader</button>
-            <button class="tab-btn" onclick="switchTab(event, 'ngo')" data-i18n="reg_tab_ngo">NGO / Medical</button>
-            <button class="tab-btn" onclick="switchTab(event, 'public')" data-i18n="reg_tab_public">Public / Civilian</button>
+            <button class="tab-btn active" onclick="switchTab(event, 'dindi')" data-i18n="reg_tab_dindi">Dindi Leader 🏴</button>
+            <button class="tab-btn" onclick="switchTab(event, 'ngo')" data-i18n="reg_tab_ngo">NGO / Medical 🏥</button>
+            <button class="tab-btn" onclick="switchTab(event, 'public')" data-i18n="reg_tab_public">Civilian 🙏</button>
         </div>
 
         <!-- Dindi Leader Form -->
         <div id="tab-dindi" class="tab-content active">
-            <form onsubmit="window.handleRegister(event, 'dindi_leader')">
-                <div class="form-group">
-                    <label for="regName_dindi_leader" data-i18n="reg_fullname">Full Name</label>
-                    <input type="text" id="regName_dindi_leader" class="input-field" required>
+            <form onsubmit="handleRegisterWithSpinner(event, 'dindi_leader')">
+                <div class="form-grid">
+                    <div class="input-group">
+                        <input type="text" id="regName_dindi_leader" class="floating-input" placeholder=" " required>
+                        <label for="regName_dindi_leader" class="floating-label" data-i18n="reg_fullname">Full Name</label>
+                    </div>
+                    <div class="input-group">
+                        <input type="tel" id="regPhone_dindi_leader" class="floating-input" placeholder=" " required>
+                        <label for="regPhone_dindi_leader" class="floating-label" data-i18n="reg_phone">WhatsApp Number</label>
+                    </div>
+                    <div class="input-group">
+                        <input type="text" id="dindiName" class="floating-input" placeholder=" " required>
+                        <label for="dindiName" class="floating-label" data-i18n="reg_dindi_name">Dindi / Group Name</label>
+                    </div>
+                    <div class="input-group">
+                        <input type="text" id="villageName" class="floating-input" placeholder=" " required>
+                        <label for="villageName" class="floating-label" data-i18n="reg_village">Village of Origin</label>
+                    </div>
+                    <div class="input-group full-width">
+                        <input type="password" id="regPass_dindi_leader" class="floating-input" placeholder=" " required>
+                        <label for="regPass_dindi_leader" class="floating-label" data-i18n="reg_pass">Password</label>
+                    </div>
+                    <div class="input-group full-width">
+                        <input type="number" id="pilgrimCount" class="floating-input" placeholder=" " required>
+                        <label for="pilgrimCount" class="floating-label" data-i18n="reg_pilgrims">Number of Pilgrims</label>
+                    </div>
+                    <div class="input-group full-width">
+                        <label class="photo-upload" onclick="document.getElementById('leaderPhoto').click()">
+                            <span class="photo-label-text" data-i18n="reg_photo">📷 Upload Leader Photo</span>
+                            <input type="file" id="leaderPhoto" accept="image/*" onchange="previewPhoto(this)">
+                            <img id="photoPreview" class="photo-preview" src="" alt="Preview">
+                        </label>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="regPhone_dindi_leader" data-i18n="reg_phone">WhatsApp Number</label>
-                    <input type="tel" id="regPhone_dindi_leader" class="input-field" required>
-                </div>
-                <div class="form-group">
-                    <label for="regPass_dindi_leader" data-i18n="reg_pass">Password</label>
-                    <input type="password" id="regPass_dindi_leader" class="input-field" required>
-                </div>
-                <div class="form-group">
-                    <label for="dindiName" data-i18n="reg_dindi_name">Dindi / Group Name</label>
-                    <input type="text" id="dindiName" class="input-field" required>
-                </div>
-                <div class="form-group">
-                    <label for="villageName" data-i18n="reg_village">Village of Origin</label>
-                    <input type="text" id="villageName" class="input-field" required>
-                </div>
-                <div class="form-group">
-                    <label for="pilgrimCount" data-i18n="reg_pilgrims">Number of Pilgrims</label>
-                    <input type="number" id="pilgrimCount" class="input-field" required>
-                </div>
-                <div class="form-group">
-                    <label for="leaderPhoto" data-i18n="reg_photo">Leader Photo</label>
-                    <input type="file" id="leaderPhoto" class="input-field" accept="image/*" style="padding: 8px;" required>
-                </div>
-                <button type="submit" class="btn-primary submit-btn" data-i18n="reg_btn_dindi">Register as Dindi Leader</button>
+                <button type="submit" class="btn-signin">
+                    <span class="btn-text" data-i18n="reg_btn_dindi">Register as Dindi Leader</span>
+                    <span class="btn-spinner"></span>
+                </button>
             </form>
         </div>
 
         <!-- NGO Form -->
         <div id="tab-ngo" class="tab-content">
-            <form onsubmit="window.handleRegister(event, 'ngo')">
-                <div class="form-group">
-                    <label for="regName_ngo" data-i18n="reg_fullname">Full Name</label>
-                    <input type="text" id="regName_ngo" class="input-field" required>
+            <form onsubmit="handleRegisterWithSpinner(event, 'ngo')">
+                <div class="form-grid">
+                    <div class="input-group">
+                        <input type="text" id="regName_ngo" class="floating-input" placeholder=" " required>
+                        <label for="regName_ngo" class="floating-label" data-i18n="reg_fullname">Full Name</label>
+                    </div>
+                    <div class="input-group">
+                        <input type="tel" id="regPhone_ngo" class="floating-input" placeholder=" " required>
+                        <label for="regPhone_ngo" class="floating-label" data-i18n="reg_phone">WhatsApp Number</label>
+                    </div>
+                    <div class="input-group full-width">
+                        <input type="password" id="regPass_ngo" class="floating-input" placeholder=" " required>
+                        <label for="regPass_ngo" class="floating-label" data-i18n="reg_pass">Password</label>
+                    </div>
+                    <div class="input-group">
+                        <input type="text" id="ngoName" class="floating-input" placeholder=" " required>
+                        <label for="ngoName" class="floating-label" data-i18n="reg_ngo_name">NGO Name</label>
+                    </div>
+                    <div class="input-group">
+                        <input type="text" id="ngoRegNo" class="floating-input" placeholder=" " required>
+                        <label for="ngoRegNo" class="floating-label" data-i18n="reg_ngo_regno">Registration Number</label>
+                    </div>
+                    <div class="input-group full-width">
+                        <input type="text" id="location" class="floating-input" placeholder=" " required>
+                        <label for="location" class="floating-label" data-i18n="reg_location">Location / Area</label>
+                    </div>
+                    <div class="input-group full-width">
+                        <select id="ngoType" class="floating-input" required style="padding-top:20px; padding-bottom:6px;">
+                            <option value="" disabled selected data-i18n="reg_service_select">Select Service...</option>
+                            <option value="Food" data-i18n="reg_service_food">Food / Anna Setu</option>
+                            <option value="Medical" data-i18n="reg_service_medical">Medical / Health</option>
+                            <option value="Shelter" data-i18n="reg_service_shelter">Shelter</option>
+                        </select>
+                        <label for="ngoType" class="floating-label" style="top:6px; font-size:11px; font-weight:600; color:var(--marigold-deep);" data-i18n="reg_service_type">Service Type</label>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="regPhone_ngo" data-i18n="reg_phone">WhatsApp Number</label>
-                    <input type="tel" id="regPhone_ngo" class="input-field" required>
-                </div>
-                <div class="form-group">
-                    <label for="regPass_ngo" data-i18n="reg_pass">Password</label>
-                    <input type="password" id="regPass_ngo" class="input-field" required>
-                </div>
-                <div class="form-group">
-                    <label for="ngoName" data-i18n="reg_ngo_name">NGO Name</label>
-                    <input type="text" id="ngoName" class="input-field" required>
-                </div>
-                <div class="form-group">
-                    <label for="ngoRegNo" data-i18n="reg_ngo_regno">Registration Number</label>
-                    <input type="text" id="ngoRegNo" class="input-field" required>
-                </div>
-                <div class="form-group">
-                    <label for="location" data-i18n="reg_location">Location / Area</label>
-                    <input type="text" id="location" class="input-field" required>
-                </div>
-                <div class="form-group">
-                    <label for="ngoType" data-i18n="reg_service_type">Service Type</label>
-                    <select id="ngoType" class="input-field" required>
-                        <option value="" disabled selected data-i18n="reg_service_select">Select Service...</option>
-                        <option value="Food" data-i18n="reg_service_food">Food / Anna Setu</option>
-                        <option value="Medical" data-i18n="reg_service_medical">Medical / Health</option>
-                        <option value="Shelter" data-i18n="reg_service_shelter">Shelter</option>
-                    </select>
-                </div>
-                <button type="submit" class="btn-primary submit-btn" data-i18n="reg_btn_ngo">Register as NGO</button>
+                <button type="submit" class="btn-signin">
+                    <span class="btn-text" data-i18n="reg_btn_ngo">Register as NGO</span>
+                    <span class="btn-spinner"></span>
+                </button>
             </form>
         </div>
 
         <!-- Public Form -->
         <div id="tab-public" class="tab-content">
-            <form onsubmit="window.handleRegister(event, 'public')">
-                <div class="form-group">
-                    <label for="regName_public" data-i18n="reg_fullname">Full Name</label>
-                    <input type="text" id="regName_public" class="input-field" required>
+            <form onsubmit="handleRegisterWithSpinner(event, 'public')">
+                <div class="form-grid">
+                    <div class="input-group">
+                        <input type="text" id="regName_public" class="floating-input" placeholder=" " required>
+                        <label for="regName_public" class="floating-label" data-i18n="reg_fullname">Full Name</label>
+                    </div>
+                    <div class="input-group">
+                        <input type="tel" id="regPhone_public" class="floating-input" placeholder=" " required>
+                        <label for="regPhone_public" class="floating-label" data-i18n="reg_phone">WhatsApp Number</label>
+                    </div>
+                    <div class="input-group full-width">
+                        <input type="password" id="regPass_public" class="floating-input" placeholder=" " required>
+                        <label for="regPass_public" class="floating-label" data-i18n="reg_pass">Password</label>
+                    </div>
+                    <div class="input-group full-width">
+                        <input type="text" id="address_public" class="floating-input" placeholder=" " required>
+                        <label for="address_public" class="floating-label" data-i18n="reg_address">City / Address</label>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label for="regPhone_public" data-i18n="reg_phone">WhatsApp Number</label>
-                    <input type="tel" id="regPhone_public" class="input-field" required>
-                </div>
-                <div class="form-group">
-                    <label for="regPass_public" data-i18n="reg_pass">Password</label>
-                    <input type="password" id="regPass_public" class="input-field" required>
-                </div>
-                <div class="form-group">
-                    <label for="address_public" data-i18n="reg_address">City / Address</label>
-                    <input type="text" id="address_public" class="input-field" required>
-                </div>
-                <button type="submit" class="btn-primary submit-btn" data-i18n="reg_btn_public">Register as Civilian</button>
+                <button type="submit" class="btn-signin">
+                    <span class="btn-text" data-i18n="reg_btn_public">Register as Civilian</span>
+                    <span class="btn-spinner"></span>
+                </button>
             </form>
         </div>
 
@@ -212,17 +271,70 @@
             });
             e.target.classList.add('active');
 
-            // Update content
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.remove('active');
+            // Fade out current content
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => {
+                if (content.classList.contains('active')) {
+                    content.style.opacity = '0';
+                    setTimeout(() => {
+                        content.classList.remove('active');
+                    }, 200);
+                }
             });
-            document.getElementById('tab-' + tabId).classList.add('active');
+
+            // Fade in new content
+            setTimeout(() => {
+                const target = document.getElementById('tab-' + tabId);
+                target.classList.add('active');
+                // trigger reflow
+                void target.offsetWidth;
+                target.style.opacity = '1';
+            }, 200);
         }
         
-        // Dummy handleRegister function; this will be overwritten or handled by auth.js logic eventually
-        window.handleRegister = function(e, role) {
-            e.preventDefault();
-            console.log("Registration attempted for role:", role);
+        function previewPhoto(input) {
+            const preview = document.getElementById('photoPreview');
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                }
+                reader.readAsDataURL(input.files[0]);
+            } else {
+                preview.src = '';
+                preview.style.display = 'none';
+            }
+        }
+
+        async function handleRegisterWithSpinner(event, role) {
+            event.preventDefault();
+            const btn = event.target.querySelector('.btn-signin');
+            btn.classList.add('loading');
+            btn.disabled = true;
+
+            setTimeout(() => {
+                if (window.handleRegister) {
+                    try {
+                        const result = window.handleRegister(event, role);
+                        if (result instanceof Promise) {
+                            result.finally(() => {
+                                btn.classList.remove('loading');
+                                btn.disabled = false;
+                            });
+                        } else {
+                            btn.classList.remove('loading');
+                            btn.disabled = false;
+                        }
+                    } catch(e) {
+                        btn.classList.remove('loading');
+                        btn.disabled = false;
+                    }
+                } else {
+                    btn.classList.remove('loading');
+                    btn.disabled = false;
+                }
+            }, 300);
         }
     </script>
     <script type="module" src="js/config.js"></script>
