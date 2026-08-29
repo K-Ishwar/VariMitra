@@ -1123,6 +1123,19 @@ window.setupCustomViaSearch = function(dayIndex) {
     };
 };
 
+let _lostFeedStarted = false;
+window.showLostFoundFeed = function() {
+    const card = document.getElementById('lostFoundCard');
+    const panel = document.getElementById('lostFoundPanel');
+    if (card) card.style.display = 'none';
+    if (panel) panel.style.display = 'block';
+    // Start listener only once
+    if (!_lostFeedStarted) {
+        _lostFeedStarted = true;
+        window.initLostPilgrimsFeed();
+    }
+};
+
 window.initLostPilgrimsFeed = function() {
     const q = query(collection(db, 'lostReports'), orderBy('timestamp', 'desc'));
 
@@ -1291,8 +1304,8 @@ window.initLostPilgrimsFeed = function() {
                 + foundSection;
         }
 
-        // Badges
-        ['lostCountBadge', 'lostCountBadgeDindi'].forEach(badgeId => {
+        // Badges — update card badge (always), panel badge (lostCountBadge2), and dindi badge
+        ['lostCountBadge', 'lostCountBadge2', 'lostCountBadgeDindi'].forEach(badgeId => {
             const badge = document.getElementById(badgeId);
             if (!badge) return;
             if (lostCount > 0) {
@@ -1318,5 +1331,24 @@ window.resolveLostReport = async function(reportId, pilgrimName) {
     }
 };
 
-window.initAuthorityDashboard = window.initLostPilgrimsFeed;
+// Authority dashboard: badge-count listener on load. Full feed loads on card click.
+window.initAuthorityDashboard = function() {
+    const q = query(collection(db, 'lostReports'), orderBy('timestamp', 'desc'));
+    onSnapshot(q, (snapshot) => {
+        let lostCount = 0;
+        snapshot.forEach(docSnap => {
+            if (docSnap.data().status === 'active') lostCount++;
+        });
+        ['lostCountBadge', 'lostCountBadge2'].forEach(badgeId => {
+            const badge = document.getElementById(badgeId);
+            if (!badge) return;
+            if (lostCount > 0) {
+                badge.style.display = 'inline-block';
+                badge.innerText = lostCount;
+            } else {
+                badge.style.display = 'none';
+            }
+        });
+    });
+};
 

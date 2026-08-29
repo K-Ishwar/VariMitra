@@ -148,21 +148,26 @@
         if (!pilgrimId) {
             document.querySelector('.report-card').innerHTML = '<h3 style="color: var(--vermilion);">Invalid QR Code</h3><p>No Pilgrim ID found in the link.</p>';
         } else {
-            // Pre-fetch pilgrim + leader data to enrich the report
+            // Pre-fetch pilgrim + leader data using async/await to ensure data is ready before submit
             let leaderData = null;
-            getDoc(doc(db, 'pilgrims', pilgrimId)).then(snap => {
-                if(snap.exists()) {
-                    pilgrimData = snap.data();
-                    if(pilgrimData.leaderId) {
-                        getDoc(doc(db, 'users', pilgrimData.leaderId)).then(leaderSnap => {
-                            if(leaderSnap.exists()) {
+
+            (async () => {
+                try {
+                    const pilgrimSnap = await getDoc(doc(db, 'pilgrims', pilgrimId));
+                    if (pilgrimSnap.exists()) {
+                        pilgrimData = pilgrimSnap.data();
+                        if (pilgrimData.leaderId) {
+                            const leaderSnap = await getDoc(doc(db, 'users', pilgrimData.leaderId));
+                            if (leaderSnap.exists()) {
                                 leaderData = leaderSnap.data();
                                 leaderPhone = leaderData.phone;
                             }
-                        });
+                        }
                     }
+                } catch(e) {
+                    console.error("Could not fetch pilgrim info:", e);
                 }
-            }).catch(e => console.error("Could not fetch pilgrim info:", e));
+            })();
 
             const form = document.getElementById('reportForm');
             const reportBtn = document.getElementById('reportBtn');
