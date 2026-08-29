@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VariMitra - Register</title>
+    <link rel="stylesheet" href="CSS/style.css">
+    <style>
+        body {
+            background: radial-gradient(circle, var(--night-2) 0%, var(--night) 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            box-sizing: border-box;
+        }
+        .register-card {
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+            box-sizing: border-box;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 24px;
+            border-bottom: 2px solid var(--line);
+        }
+        .tab-btn {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 12px 8px;
+            font-family: inherit;
+            font-weight: 600;
+            color: var(--sage);
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.2s ease;
+            font-size: 14px;
+        }
+        .tab-btn.active {
+            color: var(--night);
+            border-bottom-color: var(--marigold-deep);
+        }
+        .tab-content {
+            display: none;
+            text-align: left;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        select.input-field {
+            appearance: none;
+        }
+        .submit-btn {
+            width: 100%;
+            margin-top: 16px;
+        }
+        .login-link {
+            display: inline-block;
+            margin-top: 24px;
+            font-size: 14px;
+            color: var(--night);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .login-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="card register-card">
+        <div class="wordmark" style="font-size: 28px; margin-bottom: 24px;">Vari<span>Mitra</span> Registration</div>
+        
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab(event, 'dindi')">Dindi Leader</button>
+            <button class="tab-btn" onclick="switchTab(event, 'ngo')">NGO / Medical</button>
+            <button class="tab-btn" onclick="switchTab(event, 'public')">Public / Civilian</button>
+        </div>
+
+        <!-- Dindi Leader Form -->
+        <div id="tab-dindi" class="tab-content active">
+            <form onsubmit="window.handleRegister(event, 'dindi_leader')">
+                <div class="form-group">
+                    <label for="regName_dindi_leader">Full Name</label>
+                    <input type="text" id="regName_dindi_leader" class="input-field" required>
+                </div>
+                <div class="form-group">
+                    <label for="regPhone_dindi_leader">WhatsApp Number</label>
+                    <input type="tel" id="regPhone_dindi_leader" class="input-field" required>
+                </div>
+                <div class="form-group">
+                    <label for="regPass_dindi_leader">Password</label>
+                    <input type="password" id="regPass_dindi_leader" class="input-field" required>
+                </div>
+                <div class="form-group">
+                    <label for="dindiName">Dindi / Group Name</label>
+                    <input type="text" id="dindiName" class="input-field" required>
+                </div>
+                <div class="form-group">
+                    <label for="villageName">Village of Origin</label>
+                    <input type="text" id="villageName" class="input-field" required>
+                </div>
+                <div class="form-group">
+                    <label for="pilgrimCount">Number of Pilgrims</label>
+                    <input type="number" id="pilgrimCount" class="input-field" required>
+                </div>
+                <div class="form-group">
+                    <label for="leaderPhoto">Leader Photo</label>
+                    <input type="file" id="leaderPhoto" class="input-field" accept="image/*" style="padding: 8px;" required>
+                </div>
+                <button type="submit" class="btn-primary submit-btn">Register as Dindi Leader</button>
+            </form>
+        </div>
+
+        <!-- NGO Form -->
+        <div id="tab-ngo" class="tab-content">
+            <form onsubmit="window.handleRegister(event, 'ngo')">
+                <div class="form-group">
+                    <label for="regName_ngo">Full Name</label>
+                    <input type="text" id="regName_ngo" class="input-field" required>
+                </div>
+                <div class="form-group">
+                    <label for="regPhone_ngo">WhatsApp Number</label>
+                    <input type="tel" id="regPhone_ngo" class="input-field" required>
+                </div>
+                <div class="form-group">
+                    <label for="regPass_ngo">Password</label>
+                    <input type="password" id="regPass_ngo" class="input-field" required>
+                </div>
+                <div class="form-group">
+                    <label for="ngoName">NGO Name</label>
+                    <input type="text" id="ngoName" class="input-field" required>
+                </div>
+                <div class="form-group">
+                    <label for="ngoRegNo">Registration Number</label>
+                    <input type="text" id="ngoRegNo" class="input-field" required>
+                </div>
+                <div class="form-group">
+                    <label for="location">Location / Area</label>
+                    <input type="text" id="location" class="input-field" required>
+                </div>
+                <div class="form-group">
+                    <label for="ngoType">Service Type</label>
+                    <select id="ngoType" class="input-field" required>
+                        <option value="" disabled selected>Select Service...</option>
+                        <option value="Food">Food / Anna Setu</option>
+                        <option value="Medical">Medical / Health</option>
+                        <option value="Shelter">Shelter</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-primary submit-btn">Register as NGO</button>
+            </form>
+        </div>
+
+        <!-- Public Form -->
+        <div id="tab-public" class="tab-content">
+            <form onsubmit="window.handleRegister(event, 'public')">
+                <div class="form-group">
+                    <label for="regName_public">Full Name</label>
+                    <input type="text" id="regName_public" class="input-field" required>
+                </div>
+                <div class="form-group">
+                    <label for="regPhone_public">WhatsApp Number</label>
+                    <input type="tel" id="regPhone_public" class="input-field" required>
+                </div>
+                <div class="form-group">
+                    <label for="regPass_public">Password</label>
+                    <input type="password" id="regPass_public" class="input-field" required>
+                </div>
+                <div class="form-group">
+                    <label for="address_public">City / Address</label>
+                    <input type="text" id="address_public" class="input-field" required>
+                </div>
+                <button type="submit" class="btn-primary submit-btn">Register as Civilian</button>
+            </form>
+        </div>
+
+        <a href="index.html" class="login-link">Already have an account? Login here</a>
+    </div>
+
+    <script>
+        function switchTab(e, tabId) {
+            // Update buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            e.target.classList.add('active');
+
+            // Update content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById('tab-' + tabId).classList.add('active');
+        }
+        
+        // Dummy handleRegister function; this will be overwritten or handled by auth.js logic eventually
+        window.handleRegister = function(e, role) {
+            e.preventDefault();
+            console.log("Registration attempted for role:", role);
+        }
+    </script>
+    <script type="module" src="js/config.js"></script>
+    <script type="module" src="js/main.js"></script>
+    <script type="module" src="js/auth.js"></script>
+</body>
+</html>
