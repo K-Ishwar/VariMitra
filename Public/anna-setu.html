@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>VariMitra - Anna Setu</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600&family=Inter:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Global Styles -->
+    <link rel="stylesheet" href="CSS/style.css">
+    
+    <style>
+        /* Anna Setu Specific Styles */
+        .anna-header {
+            background: linear-gradient(135deg, rgba(242,169,59,0.15), var(--paper-2));
+            padding: 24px;
+            border-radius: 14px;
+            border: 1.5px solid var(--marigold);
+            margin-bottom: 24px;
+            text-align: center;
+        }
+        .anna-header h3 {
+            margin: 0;
+            font-size: 22px;
+            font-family: var(--font-heading);
+            font-weight: 600;
+            color: var(--ink);
+        }
+        .anna-header p {
+            margin: 4px 0 0;
+            font-size: 13px;
+            color: #7a6d54;
+        }
+
+        .tabs {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            background: var(--paper-2);
+            border: 1.5px solid var(--line);
+            padding: 8px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        .tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            color: #7a6d54;
+            transition: all 0.2s;
+        }
+        .tab.active {
+            background: var(--marigold-deep);
+            color: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+
+        /* Cards */
+        .card {
+            background: #fff;
+            border: 1.5px solid var(--line);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--line);
+        }
+        .card-title {
+            font-weight: 700;
+            font-size: 16px;
+            color: var(--ink);
+        }
+        .card-subtitle {
+            font-size: 13px;
+            color: #7a6d54;
+            margin-top: 4px;
+        }
+        .badge {
+            background: #e4f0e4;
+            color: var(--sage);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        .badge.pending {
+            background: #fef3c7;
+            color: #d97706;
+        }
+        .badge.rejected {
+            background: #fee2e2;
+            color: var(--vermilion);
+        }
+        
+        .action-btn {
+            background: var(--marigold);
+            color: var(--ink);
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            width: 100%;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: transform 0.1s;
+        }
+        .action-btn:active {
+            transform: scale(0.98);
+        }
+        .action-btn.secondary {
+            background: var(--paper-2);
+            color: var(--ink);
+            border: 1px solid var(--line);
+        }
+        .action-btn.danger {
+            background: #fee2e2;
+            color: var(--vermilion);
+        }
+        .action-btn.success {
+            background: var(--sage);
+            color: #fff;
+        }
+        .btn-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+            z-index: 100;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal {
+            background: #fff;
+            width: 90%;
+            max-width: 400px;
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            animation: slideUp 0.3s ease-out;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .input-group {
+            margin-bottom: 16px;
+        }
+        .input-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 700;
+            color: #5a5140;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+        .input-group select, .input-group input {
+            width: 100%;
+            padding: 12px;
+            background: #fff;
+            border: 1.5px solid var(--line);
+            border-radius: 10px;
+            color: var(--ink);
+            font-family: inherit;
+            font-size: 15px;
+            box-sizing: border-box;
+        }
+        .input-group input:focus, .input-group select:focus {
+            border-color: var(--marigold-deep);
+            outline: none;
+        }
+
+        /* Leader Profile in Modal */
+        .leader-profile {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-top: 10px;
+            background: var(--paper-2);
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid var(--line);
+        }
+        .leader-profile img {
+            width: 60px;
+            height: 60px;
+            border-radius: 30px;
+            object-fit: cover;
+            border: 2px solid var(--marigold-deep);
+        }
+        
+    </style>
+</head>
+<body>
+    <div class="app-container">
+
+        <!-- Navbar -->
+        <nav class="navbar">
+            <div style="display:flex;align-items:center;gap:16px;">
+                <div class="wordmark" style="cursor:pointer;" onclick="window.location.href='dashboard.html'">Vari<span>Mitra</span></div>
+                <div class="langtoggle">
+                    <button id="btnEN" class="active">EN</button>
+                    <button id="btnMR">मरा</button>
+                </div>
+            </div>
+            <div class="nav-links">
+                <button class="nav-btn" style="display:block;" onclick="window.location.href='dashboard.html'">🏠 Back to Dashboard</button>
+            </div>
+        </nav>
+
+        <main class="main-content" style="display: flex; justify-content: center; padding: 40px 20px;">
+            <div class="dashboard-card" style="background: var(--paper); max-width: 450px; width: 100%; border-radius: 16px; padding: 32px 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); box-sizing: border-box;">
+                
+                <div class="anna-header">
+                    <h3>🍲 Anna Setu</h3>
+                    <p data-i18n="nav_seva">Donor to Dindi Coordination</p>
+                    <div id="welcomeMessage" style="margin-top: 12px; font-weight: 600; color: var(--marigold-deep); font-size: 15px;"></div>
+                </div>
+
+                <!-- DONOR VIEW -->
+                <div id="view-donor" style="display: none;">
+                    <div class="tabs">
+                        <div class="tab active" onclick="switchDonorTab('explore')" id="tab-explore">Explore Stops</div>
+                        <div class="tab" onclick="switchDonorTab('requests')" id="tab-requests">My Donations</div>
+                    </div>
+
+                    <div id="donor-explore" class="content-section active">
+                        <div class="card" style="margin-bottom: 24px;">
+                            <div class="card-header" style="border-bottom:none; padding-bottom:0; margin-bottom:10px;">
+                                <div>
+                                    <h4 style="margin:0; font-size:16px; color:var(--ink);">Find a Seva Point</h4>
+                                    <p style="margin:4px 0 0; font-size:13px; color:#7a6d54;">Discover nearby Dindi stops to donate.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="input-group">
+                                <label>Date of Donation</label>
+                                <input type="date" id="searchDate">
+                            </div>
+                            
+                            <div class="input-group" style="position:relative;">
+                                <label>Location</label>
+                                <input type="text" id="searchLoc" placeholder="Search village or city..." oninput="window.searchDonorLoc(this.value)" autocomplete="off">
+                                <input type="hidden" id="searchLocCoords">
+                                <div id="donorLocResults" class="autocomplete-results" style="display:none; position:absolute; top:100%; left:0; right:0; background:#fff; border:1px solid var(--line); border-radius:10px; z-index:10; max-height:200px; overflow-y:auto; box-shadow:0 4px 12px rgba(0,0,0,0.1);"></div>
+                            </div>
+
+                            <button class="action-btn" onclick="searchSevaPoints()" style="margin-top: 8px;">🔍 Search Stops</button>
+                        </div>
+
+                        <div id="stops-list">
+                            <!-- Stops populated by JS -->
+                            <div style="text-align:center; padding:20px; color:#7a6d54;">Enter a date and location to find nearby Dindis.</div>
+                        </div>
+                    </div>
+
+                    <div id="donor-requests" class="content-section">
+                        <div id="requests-list-donor">
+                            <!-- Requests populated by JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- LEADER VIEW -->
+                <div id="view-leader" style="display: none;">
+                    <div class="tabs">
+                        <div class="tab active" onclick="switchLeaderTab('incoming')" id="tab-incoming">Incoming Requests</div>
+                        <div class="tab" onclick="switchLeaderTab('accepted')" id="tab-accepted">Accepted</div>
+                    </div>
+
+                    <div id="leader-incoming" class="content-section active">
+                        <div id="incoming-list">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <div id="leader-accepted" class="content-section">
+                        <div id="accepted-list">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Loading View -->
+                <div id="view-loading" style="text-align:center; padding:50px 20px; color:#7a6d54;">
+                    Authenticating...
+                </div>
+                
+                <!-- Exit Button -->
+                <button class="action-btn danger" style="margin-top: 32px;" onclick="window.location.href='index.html'">Exit Anna Setu</button>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- DONATION MODAL (For Donors) -->
+    <div class="modal-overlay" id="donateModal">
+        <div class="modal">
+            <h2 style="margin-bottom:5px; font-size:22px; color: var(--ink);">Offer Donation</h2>
+            <p id="modalStopName" style="color:#7a6d54; font-size:14px; margin-bottom:24px;">Dindi at Location</p>
+            
+            <input type="hidden" id="modalStopId">
+            <input type="hidden" id="modalDindiId">
+
+            <div class="input-group">
+                <label>Type of Seva</label>
+                <select id="modalItemType">
+                    <option value="Food">Food / Meals</option>
+                    <option value="Water">Drinking Water</option>
+                    <option value="Medical">Medical Supplies</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            
+            <div class="input-group">
+                <label>Quantity / Description</label>
+                <input type="text" id="modalQuantity" placeholder="e.g., Poha for 500 people" required>
+            </div>
+            
+            <div class="input-group">
+                <label>Proposed Time of Arrival</label>
+                <input type="time" id="modalTime" min="17:00" required>
+            </div>
+            
+            <div class="btn-row" style="margin-top: 24px;">
+                <button class="action-btn secondary" onclick="closeDonateModal()">Cancel</button>
+                <button class="action-btn" onclick="submitDonation()">Send Request</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- LEADER CONTACT MODAL (For Donors when accepted) -->
+    <div class="modal-overlay" id="contactModal">
+        <div class="modal">
+            <h2 style="margin-bottom:5px; font-size:22px; color:var(--sage);">Donation Accepted!</h2>
+            <p style="color:#7a6d54; font-size:14px; margin-bottom:24px;">Please meet the Dindi Leader at the halt to hand over the supplies.</p>
+            
+            <div id="contactDetailsHtml">
+                <!-- Injected via JS -->
+            </div>
+            
+            <button class="action-btn secondary" style="margin-top:24px;" onclick="closeContactModal()">Close</button>
+        </div>
+    </div>
+
+    <script type="module" src="js/config.js"></script>
+    <script type="module" src="js/main.js"></script>
+    <script type="module" src="js/anna-setu.js"></script>
+</body>
+</html>
