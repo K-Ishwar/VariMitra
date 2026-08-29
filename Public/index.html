@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VariMitra - Login</title>
+    <link rel="stylesheet" href="CSS/style.css">
+    <style>
+        body {
+            background: radial-gradient(circle, var(--night-2) 0%, var(--night) 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .lang-container {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+        }
+        .login-card {
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            box-sizing: border-box;
+            margin: 16px;
+        }
+        .subtitle {
+            font-size: 14px;
+            color: var(--sage);
+            margin-top: 8px;
+            margin-bottom: 24px;
+            line-height: 1.5;
+            font-weight: 500;
+        }
+        .form-group {
+            margin-bottom: 16px;
+            text-align: left;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        .submit-btn {
+            width: 100%;
+            margin-top: 8px;
+        }
+        .register-link {
+            display: inline-block;
+            margin-top: 24px;
+            font-size: 14px;
+            color: var(--night);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .register-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="lang-container">
+        <div class="langtoggle">
+            <button id="btn-en" class="active" onclick="setLanguage('en')">EN</button>
+            <button id="btn-mr" onclick="setLanguage('mr')">MR</button>
+        </div>
+    </div>
+
+    <div class="card login-card">
+        <div class="wordmark" style="font-size: 32px;">Vari<span>Mitra</span></div>
+        <div class="subtitle" data-en="Pilgrimage Management System" data-mr="वारी व्यवस्थापन प्रणाली">Pilgrimage Management System</div>
+        
+        <form onsubmit="window.handleLogin(event)">
+            <div class="form-group">
+                <label for="username" data-en="Username" data-mr="वापरकर्तानाव">Username</label>
+                <input type="text" id="username" class="input-field" placeholder="Enter your username" data-en-placeholder="Enter your username" data-mr-placeholder="तुमचे वापरकर्तानाव प्रविष्ट करा" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="loginPass" data-en="Password" data-mr="संकेतशब्द">Password</label>
+                <input type="password" id="loginPass" class="input-field" placeholder="Enter your password" data-en-placeholder="Enter your password" data-mr-placeholder="तुमचा संकेतशब्द प्रविष्ट करा" required>
+            </div>
+            
+            <button type="submit" class="btn-primary submit-btn" data-en="Login" data-mr="लॉगिन">Login</button>
+        </form>
+        
+        <a href="register.html" class="register-link" data-en="New User? Register Here" data-mr="नवीन वापरकर्ता? येथे नोंदणी करा">New User? Register Here</a>
+    </div>
+
+    <script>
+        function setLanguage(lang) {
+            // Update active button styling
+            document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+            document.getElementById('btn-mr').classList.toggle('active', lang === 'mr');
+            
+            // Update standard text content
+            document.querySelectorAll('[data-en]').forEach(el => {
+                el.textContent = el.getAttribute(`data-${lang}`);
+            });
+            
+            // Update placeholders for inputs
+            document.querySelectorAll('[data-en-placeholder]').forEach(el => {
+                el.setAttribute('placeholder', el.getAttribute(`data-${lang}-placeholder`));
+            });
+        }
+        
+        // Dummy handleLogin to prevent form from submitting natively
+        window.handleLogin = function(event) {
+            event.preventDefault();
+            console.log("Login attempted");
+        }
+    </script>
+    <script type="module" src="js/config.js"></script>
+    <script type="module" src="js/main.js"></script>
+    <script type="module" src="js/auth.js"></script>
+</body>
+</html>

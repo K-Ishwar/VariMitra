@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VariMitra - Dashboard</title>
+    <link rel="stylesheet" href="CSS/style.css">
+    <style>
+        /* Hidden by default as per SPA design */
+        .nav-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-family: inherit;
+            font-size: 14px;
+            color: var(--ink);
+            cursor: pointer;
+            padding: 8px 12px;
+            font-weight: 500;
+        }
+        .nav-btn:hover {
+            text-decoration: underline;
+            color: var(--marigold-deep);
+        }
+        .logout-btn {
+            color: var(--vermilion);
+        }
+        .logout-btn:hover {
+            color: var(--vermilion);
+            text-decoration: underline;
+        }
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .dashboard-content {
+            padding: 32px 0;
+        }
+        .role-panel {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <nav class="navbar">
+            <div class="wordmark">Vari<span>Mitra</span></div>
+            
+            <div class="nav-links">
+                <!-- Role-specific Nav Buttons (all hidden by default) -->
+                <button id="nav-alerts" class="nav-btn" data-i18n="nav_alerts">Emergency Alerts</button>
+                <button id="nav-seva" class="nav-btn" data-i18n="nav_seva">Anna Setu</button>
+                <button id="nav-lostfound" class="nav-btn" data-i18n="nav_lostfound">Lost & Found</button>
+                <button id="nav-sanitation" class="nav-btn" data-i18n="nav_sanitation">Sanitation</button>
+                <button id="nav-map" class="nav-btn" data-i18n="nav_map">Live Map</button>
+                
+                <!-- Language Toggle -->
+                <div class="langtoggle" style="margin-left: 8px; margin-right: 8px;">
+                    <button id="btnEN" class="active">EN</button>
+                    <button id="btnMR">MR</button>
+                </div>
+                
+                <!-- Logout Button -->
+                <button id="nav-logout" class="nav-btn logout-btn" data-i18n="logout">Log Out</button>
+            </div>
+        </nav>
+
+        <main class="dashboard-content">
+            <div style="margin-bottom: 24px;">
+                <h2 style="margin: 0; font-size: 24px;"><span data-i18n="welcome">Welcome</span>, <span id="displayRole" style="color: var(--marigold-deep);">User</span></h2>
+            </div>
+
+            <!-- SPA Role Panels (all hidden by default) -->
+            <div id="panel-super" class="role-panel card">
+                <h3 data-i18n="title_super">Super Admin Dashboard</h3>
+                <p>System configuration and global metrics.</p>
+            </div>
+
+            <div id="panel-authority" class="role-panel card">
+                <h3 data-i18n="title_authority">Authority Dashboard</h3>
+                <p>Police and Health administration tools.</p>
+            </div>
+
+            <div id="panel-dindi" class="role-panel card">
+                <h3 data-i18n="title_dindi">Dindi Leader Dashboard</h3>
+                <p>Dindi management and tracking tools.</p>
+            </div>
+
+            <div id="panel-ngo" class="role-panel card">
+                <h3 data-i18n="title_ngo">NGO Dashboard</h3>
+                <p>Seva requests and distribution management.</p>
+            </div>
+
+            <div id="panel-public" class="role-panel card">
+                <h3 data-i18n="title_public">Civilian Dashboard</h3>
+                <p>Public services, maps, and emergency alerts.</p>
+            </div>
+        </main>
+    </div>
+
+    <!-- Application Scripts -->
+    <script type="module" src="js/config.js"></script>
+    <script type="module" src="js/main.js"></script>
+    <script type="module" src="js/auth.js"></script>
+    <script type="module" src="js/dindi.js"></script>
+    <script type="module" src="js/modules/qr.js"></script>
+    <script type="module" src="js/modules/authority.js"></script>
+    <script type="module" src="js/modules/ngo.js"></script>
+</body>
+</html>
