@@ -1,0 +1,27 @@
+# macOS
+.DS_Store
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Firebase
+.firebase/
+firebase-debug.log*
+
+# Environment Variables (Never commit API keys!)
+.env
+.env.local
+.env.*.local
+js/config.local.js
+
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+node_modules/
