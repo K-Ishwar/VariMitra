@@ -148,14 +148,16 @@
         if (!pilgrimId) {
             document.querySelector('.report-card').innerHTML = '<h3 style="color: var(--vermilion);">Invalid QR Code</h3><p>No Pilgrim ID found in the link.</p>';
         } else {
-            // Pre-fetch pilgrim data to get emergency contact
+            // Pre-fetch pilgrim + leader data to enrich the report
+            let leaderData = null;
             getDoc(doc(db, 'pilgrims', pilgrimId)).then(snap => {
                 if(snap.exists()) {
                     pilgrimData = snap.data();
                     if(pilgrimData.leaderId) {
                         getDoc(doc(db, 'users', pilgrimData.leaderId)).then(leaderSnap => {
                             if(leaderSnap.exists()) {
-                                leaderPhone = leaderSnap.data().phone;
+                                leaderData = leaderSnap.data();
+                                leaderPhone = leaderData.phone;
                             }
                         });
                     }
@@ -230,11 +232,25 @@
 
                 try {
                     await addDoc(collection(db, 'lostReports'), {
+                        // Pilgrim info
                         pilgrimId: pilgrimId,
                         pilgrimName: pilgrimData ? pilgrimData.fullName : 'Unknown',
+                        pilgrimBloodGroup: pilgrimData ? pilgrimData.bloodGroup : null,
+                        pilgrimMedical: pilgrimData ? pilgrimData.medicalInfo : null,
+                        // Emergency contact
+                        emergencyContact: pilgrimData ? pilgrimData.emergencyContact : null,
+                        emergencyPhone: pilgrimData ? pilgrimData.emergencyPhone : null,
+                        // Dindi leader info
                         leaderId: pilgrimData ? pilgrimData.leaderId : null,
+                        leaderName: leaderData ? leaderData.name : null,
+                        leaderPhone: leaderData ? leaderData.phone : null,
+                        dindiName: leaderData ? leaderData.dindiName : null,
+                        // Rescuer / reporter
                         rescuerPhone: rescuerPhone,
+                        // Location
                         location: capturedLocation,
+                        locationName: document.getElementById('latLngDisplay').innerText || null,
+                        // Meta
                         timestamp: new Date().toISOString(),
                         status: 'active'
                     });

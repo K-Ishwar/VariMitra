@@ -1127,7 +1127,8 @@ window.initLostPilgrimsFeed = function() {
     const q = query(collection(db, 'lostReports'), orderBy('timestamp', 'desc'));
 
     onSnapshot(q, (snapshot) => {
-        let lostHtml = '';
+        let lostAuthHtml = '';
+        let lostDindiHtml = '';
         let foundHtml = '';
         let lostCount = 0;
         let foundCount = 0;
@@ -1136,82 +1137,161 @@ window.initLostPilgrimsFeed = function() {
             const data = docSnap.data();
             const timeStr = new Date(data.timestamp).toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' });
             const location = data.location || {};
-            const locName = data.locationName || (location.lat ? `${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}` : 'Unknown');
+            const locName = data.locationName || (location.lat ? `${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}` : 'Unknown location');
             const mapsLink = location.lat ? `https://maps.google.com/?q=${location.lat},${location.lng}` : null;
+            const mapsHtml = mapsLink
+                ? `<a href="${mapsLink}" target="_blank" style="color: var(--marigold-deep); text-decoration: underline; font-weight:500;">${locName}</a>`
+                : locName;
 
             if (data.status === 'active') {
                 lostCount++;
-                lostHtml += `
-                    <div style="background: #fff8f6; border-left: 4px solid var(--vermilion); padding: 14px 16px; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;">
-                        <div style="flex: 1;">
-                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
-                                <span style="font-size: 18px;">🚨</span>
-                                <strong style="color: var(--ink); font-size: 15px;">${data.pilgrimName || 'Unknown'}</strong>
-                                <span style="font-size: 11px; color: var(--sage); margin-left: auto;">${timeStr}</span>
+
+                // ── AUTHORITY CARD (rich, full details) ──
+                const bloodTag = data.pilgrimBloodGroup
+                    ? `<span style="background: #fee2e2; color: var(--vermilion); border-radius: 4px; padding: 1px 6px; font-size: 11px; font-weight:700;">${data.pilgrimBloodGroup}</span>` : '';
+                const medTag = (data.pilgrimMedical && data.pilgrimMedical !== 'All Good')
+                    ? `<span style="background: #fef9c3; color: #854d0e; border-radius: 4px; padding: 1px 6px; font-size: 11px; font-weight:600;">⚠️ ${data.pilgrimMedical}</span>` : '';
+
+                lostAuthHtml += `
+                <div style="background: #fff8f6; border: 1px solid #fca5a5; border-left: 5px solid var(--vermilion); border-radius: 10px; padding: 16px; box-shadow: 0 2px 8px rgba(193,67,43,0.08); margin-bottom: 2px;">
+                    <!-- Header row -->
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 10px;">
+                        <div>
+                            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                                <span style="font-size:20px;">🚨</span>
+                                <strong style="color:var(--ink); font-size:17px;">${data.pilgrimName || 'Unknown'}</strong>
+                                ${bloodTag} ${medTag}
                             </div>
-                            <div style="font-size: 12px; color: var(--ink); margin-bottom: 4px;">
-                                📍 ${mapsLink ? `<a href="${mapsLink}" target="_blank" style="color: var(--marigold-deep); text-decoration: underline;">${locName}</a>` : locName}
-                            </div>
-                            <div style="font-size: 12px; color: var(--sage);">
-                                📞 Rescuer: ${data.rescuerPhone || 'N/A'}
-                            </div>
+                            <div style="font-size:11px; color:var(--sage); margin-top:3px;">${timeStr}</div>
                         </div>
-                        <button onclick="window.resolveLostReport('${docSnap.id}', '${(data.pilgrimName || '').replace(/'/g, "\\'")}')"
-                            style="background: #22c55e; color: white; border: none; padding: 8px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: background 0.2s;"
+                        <button onclick="window.resolveLostReport('${docSnap.id}', '${(data.pilgrimName||'').replace(/'/g,"\\'")}')"
+                            style="background:#22c55e; color:white; border:none; padding:8px 14px; border-radius:7px; font-size:12px; font-weight:700; cursor:pointer; white-space:nowrap; flex-shrink:0; transition:background 0.2s;"
                             onmouseover="this.style.background='#16a34a'" onmouseout="this.style.background='#22c55e'">
                             ✅ Mark Found
                         </button>
-                    </div>`;
+                    </div>
+
+                    <!-- Detail grid -->
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px 16px; font-size:13px;">
+
+                        <!-- Location -->
+                        <div style="grid-column:1/-1; background:white; border:1px solid var(--line); border-radius:7px; padding:10px 12px;">
+                            <div style="font-size:11px; color:var(--sage); font-weight:600; text-transform:uppercase; letter-spacing:0.4px; margin-bottom:3px;">📍 Location</div>
+                            <div style="color:var(--ink);">${mapsHtml}</div>
+                        </div>
+
+                        <!-- Dindi Leader -->
+                        <div style="background:white; border:1px solid var(--line); border-radius:7px; padding:10px 12px;">
+                            <div style="font-size:11px; color:var(--sage); font-weight:600; text-transform:uppercase; letter-spacing:0.4px; margin-bottom:6px;">👤 Dindi Leader</div>
+                            <div style="font-weight:600; color:var(--ink); margin-bottom:2px;">${data.leaderName || 'N/A'}</div>
+                            <div style="color:var(--sage); font-size:12px; margin-bottom:6px;">🏕️ ${data.dindiName || 'N/A'}</div>
+                            ${data.leaderPhone ? `
+                            <div style="display:flex; gap:6px;">
+                                <a href="tel:${data.leaderPhone}" style="display:flex; align-items:center; gap:4px; background:#1d4ed8; color:white; padding:5px 9px; border-radius:5px; font-size:11px; font-weight:600; text-decoration:none;">📞 Call</a>
+                                <a href="https://wa.me/91${data.leaderPhone}" target="_blank" style="display:flex; align-items:center; gap:4px; background:#25D366; color:white; padding:5px 9px; border-radius:5px; font-size:11px; font-weight:600; text-decoration:none;">💬 WhatsApp</a>
+                            </div>` : '<div style="color:var(--sage);font-size:12px;">No contact on file</div>'}
+                        </div>
+
+                        <!-- Emergency Contact -->
+                        <div style="background:white; border:1px solid var(--line); border-radius:7px; padding:10px 12px;">
+                            <div style="font-size:11px; color:var(--sage); font-weight:600; text-transform:uppercase; letter-spacing:0.4px; margin-bottom:6px;">🆘 Emergency Contact</div>
+                            <div style="font-weight:600; color:var(--ink); margin-bottom:2px;">${data.emergencyContact || 'N/A'}</div>
+                            <div style="color:var(--sage); font-size:12px; margin-bottom:6px;">${data.emergencyPhone || ''}</div>
+                            ${data.emergencyPhone ? `
+                            <div style="display:flex; gap:6px;">
+                                <a href="tel:${data.emergencyPhone}" style="display:flex; align-items:center; gap:4px; background:#1d4ed8; color:white; padding:5px 9px; border-radius:5px; font-size:11px; font-weight:600; text-decoration:none;">📞 Call</a>
+                                <a href="https://wa.me/91${data.emergencyPhone}" target="_blank" style="display:flex; align-items:center; gap:4px; background:#25D366; color:white; padding:5px 9px; border-radius:5px; font-size:11px; font-weight:600; text-decoration:none;">💬 WhatsApp</a>
+                            </div>` : '<div style="color:var(--sage);font-size:12px;">No contact on file</div>'}
+                        </div>
+
+                        <!-- Reporter -->
+                        <div style="grid-column:1/-1; background:#fff1f0; border:1px solid #fca5a5; border-radius:7px; padding:8px 12px; display:flex; align-items:center; justify-content:space-between;">
+                            <div>
+                                <div style="font-size:11px; color:var(--sage); font-weight:600; text-transform:uppercase; letter-spacing:0.4px; margin-bottom:2px;">🙋 Reported By (Rescuer)</div>
+                                <div style="font-weight:600; color:var(--ink);">${data.rescuerPhone || 'N/A'}</div>
+                            </div>
+                            ${data.rescuerPhone ? `
+                            <div style="display:flex; gap:6px;">
+                                <a href="tel:${data.rescuerPhone}" style="display:flex; align-items:center; gap:4px; background:#1d4ed8; color:white; padding:5px 10px; border-radius:5px; font-size:11px; font-weight:600; text-decoration:none;">📞 Call</a>
+                            </div>` : ''}
+                        </div>
+
+                    </div>
+                </div>`;
+
+                // ── DINDI LEADER CARD (compact) ──
+                lostDindiHtml += `
+                <div style="background:#fff8f6; border-left:4px solid var(--vermilion); padding:14px 16px; border-radius:8px; box-shadow:0 1px 4px rgba(0,0,0,0.08); display:flex; justify-content:space-between; align-items:flex-start; gap:12px;">
+                    <div style="flex:1;">
+                        <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+                            <span style="font-size:18px;">🚨</span>
+                            <strong style="color:var(--ink); font-size:15px;">${data.pilgrimName || 'Unknown'}</strong>
+                            <span style="font-size:11px; color:var(--sage); margin-left:auto;">${timeStr}</span>
+                        </div>
+                        <div style="font-size:12px; color:var(--ink); margin-bottom:4px;">📍 ${mapsHtml}</div>
+                        <div style="font-size:12px; color:var(--sage);">📞 Rescuer: ${data.rescuerPhone || 'N/A'}</div>
+                    </div>
+                    <button onclick="window.resolveLostReport('${docSnap.id}', '${(data.pilgrimName||'').replace(/'/g,"\\'")}')"
+                        style="background:#22c55e; color:white; border:none; padding:8px 14px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer; white-space:nowrap; flex-shrink:0;"
+                        onmouseover="this.style.background='#16a34a'" onmouseout="this.style.background='#22c55e'">
+                        ✅ Mark Found
+                    </button>
+                </div>`;
+
             } else if (data.status === 'found') {
                 foundCount++;
                 foundHtml += `
-                    <div style="background: #f0fdf4; border-left: 4px solid #22c55e; padding: 14px 16px; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.08);">
-                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                            <span style="font-size: 16px;">✅</span>
-                            <strong style="color: var(--ink); font-size: 14px;">${data.pilgrimName || 'Unknown'}</strong>
-                            <span style="font-size: 11px; color: #16a34a; margin-left: auto; font-weight: 600;">Reunited</span>
-                        </div>
-                        <div style="font-size: 12px; color: var(--sage);">${timeStr} · Rescuer: ${data.rescuerPhone || 'N/A'}</div>
-                    </div>`;
+                <div style="background:#f0fdf4; border-left:4px solid #22c55e; padding:14px 16px; border-radius:8px; box-shadow:0 1px 4px rgba(0,0,0,0.08);">
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+                        <span style="font-size:16px;">✅</span>
+                        <strong style="color:var(--ink); font-size:14px;">${data.pilgrimName || 'Unknown'}</strong>
+                        <span style="font-size:11px; color:#16a34a; margin-left:auto; font-weight:600;">Reunited</span>
+                    </div>
+                    <div style="font-size:12px; color:var(--sage);">${timeStr} · Rescuer: ${data.rescuerPhone || 'N/A'}</div>
+                </div>`;
             }
         });
 
-        // Update all feeds and badges
-        ['lostPilgrimsFeed', 'lostPilgrimsFeedDindi'].forEach(feedId => {
-            const feed = document.getElementById(feedId);
-            if (!feed) return;
-            feed.innerHTML = `
-                <!-- Stats Row -->
-                <div style="display: flex; gap: 12px; margin-bottom: 16px;">
-                    <div style="flex: 1; background: #fff1f0; border: 1px solid #fca5a5; border-radius: 10px; padding: 12px 16px; text-align: center;">
-                        <div style="font-size: 28px; font-weight: 700; color: var(--vermilion);">${lostCount}</div>
-                        <div style="font-size: 11px; color: var(--sage); font-weight: 600; margin-top: 2px;">🚨 LOST</div>
-                    </div>
-                    <div style="flex: 1; background: #f0fdf4; border: 1px solid #86efac; border-radius: 10px; padding: 12px 16px; text-align: center;">
-                        <div style="font-size: 28px; font-weight: 700; color: #16a34a;">${foundCount}</div>
-                        <div style="font-size: 11px; color: var(--sage); font-weight: 600; margin-top: 2px;">✅ REUNITED</div>
-                    </div>
-                </div>
+        const statsHtml = `
+        <div style="display:flex; gap:12px; margin-bottom:16px;">
+            <div style="flex:1; background:#fff1f0; border:1px solid #fca5a5; border-radius:10px; padding:12px 16px; text-align:center;">
+                <div style="font-size:28px; font-weight:700; color:var(--vermilion);">${lostCount}</div>
+                <div style="font-size:11px; color:var(--sage); font-weight:600; margin-top:2px;">🚨 LOST</div>
+            </div>
+            <div style="flex:1; background:#f0fdf4; border:1px solid #86efac; border-radius:10px; padding:12px 16px; text-align:center;">
+                <div style="font-size:28px; font-weight:700; color:#16a34a;">${foundCount}</div>
+                <div style="font-size:11px; color:var(--sage); font-weight:600; margin-top:2px;">✅ REUNITED</div>
+            </div>
+        </div>`;
 
-                <!-- Lost List -->
-                <div style="margin-bottom: 16px;">
-                    <h4 style="font-size: 13px; color: var(--vermilion); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 10px;">🚨 Currently Lost</h4>
-                    <div style="display: flex; flex-direction: column; gap: 8px;">
-                        ${lostHtml || '<div style="text-align: center; color: var(--sage); font-size: 13px; padding: 16px; background: var(--paper); border-radius: 8px;">No active alerts 🎉</div>'}
-                    </div>
-                </div>
+        const lostSectionLabel = `<h4 style="font-size:13px; color:var(--vermilion); font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin:0 0 10px;">🚨 Currently Lost</h4>`;
+        const foundSection = `
+        <div style="margin-top:20px;">
+            <h4 style="font-size:13px; color:#16a34a; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin:0 0 10px;">✅ Reunited Today</h4>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+                ${foundHtml || '<div style="text-align:center; color:var(--sage); font-size:13px; padding:16px; background:var(--paper); border-radius:8px;">No reunions yet</div>'}
+            </div>
+        </div>`;
 
-                <!-- Reunited List -->
-                <div>
-                    <h4 style="font-size: 13px; color: #16a34a; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 10px;">✅ Reunited Today</h4>
-                    <div style="display: flex; flex-direction: column; gap: 8px;">
-                        ${foundHtml || '<div style="text-align: center; color: var(--sage); font-size: 13px; padding: 16px; background: var(--paper); border-radius: 8px;">No reunions yet</div>'}
-                    </div>
-                </div>
-            `;
-        });
+        // Authority feed: rich cards
+        const authFeed = document.getElementById('lostPilgrimsFeed');
+        if (authFeed) {
+            authFeed.innerHTML = statsHtml
+                + lostSectionLabel
+                + `<div style="display:flex; flex-direction:column; gap:12px;">${lostAuthHtml || '<div style="text-align:center; color:var(--sage); font-size:13px; padding:16px; background:var(--paper); border-radius:8px;">No active alerts 🎉</div>'}</div>`
+                + foundSection;
+        }
 
-        // Update badges
+        // Dindi feed: compact cards
+        const dindiFeed = document.getElementById('lostPilgrimsFeedDindi');
+        if (dindiFeed) {
+            dindiFeed.innerHTML = statsHtml
+                + lostSectionLabel
+                + `<div style="display:flex; flex-direction:column; gap:8px;">${lostDindiHtml || '<div style="text-align:center; color:var(--sage); font-size:13px; padding:16px; background:var(--paper); border-radius:8px;">No active alerts 🎉</div>'}</div>`
+                + foundSection;
+        }
+
+        // Badges
         ['lostCountBadge', 'lostCountBadgeDindi'].forEach(badgeId => {
             const badge = document.getElementById(badgeId);
             if (!badge) return;
@@ -1232,7 +1312,6 @@ window.resolveLostReport = async function(reportId, pilgrimName) {
             status: 'found',
             resolvedAt: new Date().toISOString()
         });
-        // Feed updates automatically via onSnapshot
     } catch (error) {
         console.error("Error resolving report:", error);
         alert("Failed to update status: " + error.message);
@@ -1240,3 +1319,4 @@ window.resolveLostReport = async function(reportId, pilgrimName) {
 };
 
 window.initAuthorityDashboard = window.initLostPilgrimsFeed;
+
