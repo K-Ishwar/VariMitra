@@ -1,3 +1,6 @@
+import { db, ORS_API_KEY } from './config.js';
+import { doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
 const PANDHARPUR = { lat: 17.6799, lng: 75.3266 };
 let map = null;
 
@@ -173,6 +176,193 @@ window.generateRouteForm = function() {
     container.innerHTML += html;
 };
 
+// Smart Via-Naming Brain
+async function getViaName(coordinates, startName, endName) {
+    if (!coordinates || coordinates.length < 10) return "Direct Route";
+    
+    const numSamples = 7;
+    const step = Math.floor(coordinates.length / (numSamples + 1));
+    
+    for (let i = 1; i <= numSamples; i++) {
+        const idx = i * step;
+        const [lng, lat] = coordinates[idx];
+        
+        try {
+            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&zoom=14`);
+            const data = await res.json();
+            
+            const placeType = data.type || data.addresstype;
+            if (['village', 'town', 'city', 'hamlet'].includes(placeType)) {
+                let name = data.name;
+                if (name && !startName.includes(name) && !endName.includes(name) && !name.includes(startName) && !name.includes(endName)) {
+                    return name; // Found a valid via name
+                }
+            }
+        } catch (e) {
+            console.warn("Geocoding failed for point", idx);
+        }
+        
+        // Wait 200ms to respect rate limit
+        await new Promise(r => setTimeout(r, 200));
+    }
+    return "Alternative Route";
+}
+
+let dayPolylines = {};
+const routeColors = ['#E53935', '#1E88E5', '#43A047', '#FF8F00', '#8E24AA', '#00ACC1', '#D81B60'];
+
+window.confirmDayRoute = async function(dayIndex, isSilent = false) {
+    const dayData = dayCoords[dayIndex];
+    if (!dayData.start || !dayData.end) {
+        if (!isSilent) alert("Please ensure both Start and End locations are selected for this day.");
+        return;
+    }
+
+    const { start, end } = dayData;
+    
+    // Create cache ID (rounded to 4 decimals)
+    const startLatRound = start.lat.toFixed(4);
+    const startLngRound = start.lng.toFixed(4);
+    const endLatRound = end.lat.toFixed(4);
+    const endLngRound = end.lng.toFixed(4);
+    const cacheId = `${startLatRound}_${startLngRound}_${endLatRound}_${endLngRound}`;
+    
+    let routes = [];
+    
+    try {
+        if (!isSilent) {
+            // Can optionally show a loading indicator here
+            document.getElementById(`viaSelect_${dayIndex}`).innerHTML = '<option>Loading routes...</option>';
+        }
+
+        // 1. Cache First
+        const cacheRef = doc(db, 'globalRoutesCache', cacheId);
+        const cacheSnap = await getDoc(cacheRef);
+        
+        if (cacheSnap.exists()) {
+            console.log("Cache Hit for Route:", cacheId);
+            routes = cacheSnap.data().routes;
+        } else {
+            console.log("Cache Miss. Fetching from ORS API...");
+            // 2. API Second
+            const body = {
+                coordinates: [[start.lng, start.lat], [end.lng, end.lat]],
+                radiuses: [-1, -1],
+                alternative_routes: { target_count: 3 }
+            };
+            
+            const orsRes = await fetch("https://api.openrouteservice.org/v2/directions/driving-car/geojson", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': ORS_API_KEY
+                },
+                body: JSON.stringify(body)
+            });
+            
+            if (!orsRes.ok) {
+                const errText = await orsRes.text();
+                throw new Error("ORS API Error: " + errText);
+            }
+            
+            const geojson = await orsRes.json();
+            
+            if (!geojson.features || geojson.features.length === 0) {
+                throw new Error("No routes found.");
+            }
+            
+            routes = [];
+            for (let i = 0; i < geojson.features.length; i++) {
+                const feature = geojson.features[i];
+                const coords = feature.geometry.coordinates; // Array of [lng, lat]
+                
+                // 3. Smart Via-Naming Brain
+                let routeName = "Main Route";
+                if (i > 0) {
+                    routeName = "Via " + await getViaName(coords, start.name, end.name);
+                }
+                
+                // 4. Cache Save (Prune GeoJSON)
+                // We keep only the geometry coordinates and essential props to compress it heavily
+                routes.push({
+                    name: routeName,
+                    geometry: {
+                        type: "LineString",
+                        coordinates: coords
+                    },
+                    properties: {
+                        distance: feature.properties.summary.distance,
+                        duration: feature.properties.summary.duration
+                    }
+                });
+            }
+            
+            // Save to Firestore
+            await setDoc(cacheRef, { routes: routes });
+            console.log("Saved routes to cache:", cacheId);
+        }
+        
+        // 5. Populate Dropdown and Draw Map
+        const select = document.getElementById(`viaSelect_${dayIndex}`);
+        select.innerHTML = '';
+        select.disabled = false;
+        
+        routes.forEach((rt, idx) => {
+            const km = (rt.properties.distance / 1000).toFixed(1);
+            const opt = document.createElement('option');
+            opt.value = idx;
+            opt.innerText = `${rt.name} (${km} km)`;
+            select.appendChild(opt);
+        });
+        
+        // Map Drawing function
+        const drawRouteOnMap = (routeIdx) => {
+            const route = routes[routeIdx];
+            
+            // Remove previous polyline for this day if it exists
+            if (dayPolylines[dayIndex]) {
+                map.removeLayer(dayPolylines[dayIndex]);
+            }
+            
+            // Convert [lng, lat] to [lat, lng] for Leaflet
+            const latlngs = route.geometry.coordinates.map(c => [c[1], c[0]]);
+            const color = routeColors[dayIndex % routeColors.length];
+            
+            const polyline = L.polyline(latlngs, {
+                color: color,
+                weight: 5,
+                opacity: 0.8
+            }).addTo(map);
+            
+            // Add a tooltip or popup to the line
+            polyline.bindTooltip(`Day ${dayIndex + 1}: ${route.name}`, { sticky: true });
+            
+            dayPolylines[dayIndex] = polyline;
+            
+            // Auto fit bounds to show the new route
+            map.fitBounds(polyline.getBounds(), { padding: [20, 20] });
+        };
+        
+        // Draw the first route by default
+        if (map) {
+            drawRouteOnMap(0);
+        }
+        
+        // On selection change, redraw
+        select.onchange = (e) => {
+            const idx = parseInt(e.target.value, 10);
+            drawRouteOnMap(idx);
+        };
+        
+    } catch (error) {
+        console.error("Error fetching route:", error);
+        if (!isSilent) {
+            document.getElementById(`viaSelect_${dayIndex}`).innerHTML = '<option>Error Fetching Route</option>';
+            alert("Error fetching route. Please ensure ORS API key is configured correctly.");
+        }
+    }
+};
+
 let endSearchTimeout = null;
 
 window.searchEndLocation = async function(query, dayIndex) {
@@ -231,6 +421,11 @@ window.searchEndLocation = async function(query, dayIndex) {
                     dayCoords[dayIndex].end = coords;
                     dropdown.classList.remove('active');
                     
+                    // Fetch route for THIS day
+                    if (window.confirmDayRoute) {
+                        window.confirmDayRoute(dayIndex);
+                    }
+                    
                     // Auto-fill next day's start (if it exists)
                     if (dayIndex + 1 < dayCoords.length) {
                         dayCoords[dayIndex + 1].start = coords;
@@ -241,10 +436,8 @@ window.searchEndLocation = async function(query, dayIndex) {
                         
                         // If next day is the LAST day, fetch route for last leg silently
                         if (dayIndex + 1 === dayCoords.length - 1) {
-                            if (window.fetchRouteForDay) {
-                                window.fetchRouteForDay(dayIndex + 1);
-                            } else {
-                                console.log("TODO: silently auto-fetch the route for the last leg (Pandharpur)");
+                            if (window.confirmDayRoute) {
+                                window.confirmDayRoute(dayIndex + 1, true);
                             }
                         }
                     }
