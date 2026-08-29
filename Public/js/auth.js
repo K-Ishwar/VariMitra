@@ -25,7 +25,7 @@ window.handleLogin = async function(event) {
     event.preventDefault();
     showLoading();
     
-    const usernameInput = document.getElementById('username').value;
+    const usernameInput = document.getElementById('username').value.trim();
     const passwordInput = document.getElementById('loginPass').value;
     
     // Super Admin Bypass
@@ -39,39 +39,62 @@ window.handleLogin = async function(event) {
     
     try {
         const usersRef = collection(db, 'users');
-        const q = query(usersRef, where('username', '==', usernameInput), where('password', '==', passwordInput));
+        // Single-field query — avoids needing a Firestore composite index
+        const q = query(usersRef, where('username', '==', usernameInput));
         const querySnapshot = await getDocs(q);
-        
-        if (!querySnapshot.empty) {
-            const userDoc = querySnapshot.docs[0];
-            const userData = userDoc.data();
-            
-            if (userData.status === 'pending') {
-                if (window.showModal) {
-                    await window.showModal('Account Pending / खाते प्रलंबित', 'Your account is currently awaiting approval from authorities.');
-                } else {
-                    alert('Your account is currently awaiting approval from authorities.');
-                }
-                return;
-            }
-            
-            // Save to localStorage
-            localStorage.setItem('userId', userDoc.id);
-            localStorage.setItem('userRole', userData.role);
-            localStorage.setItem('userName', userData.name || userData.username);
-            if (userData.phone) {
-                localStorage.setItem('userPhone', userData.phone);
-            }
-            
-            // Redirect to SPA dashboard
-            window.location.href = 'dashboard.html';
-        } else {
+
+        console.log(`[Login] Query for username="${usernameInput}" returned ${querySnapshot.size} result(s).`);
+
+        if (querySnapshot.empty) {
+            console.warn('[Login] No user found with that username.');
             if (window.showModal) {
                 await window.showModal('Login Failed / लॉगिन अयशस्वी', 'Invalid username or password.');
             } else {
                 alert('Invalid username or password.');
             }
+            return;
         }
+
+        // Find the doc that matches the password
+        let matchedDoc = null;
+        querySnapshot.forEach(doc => {
+            console.log(`[Login] Checking doc id=${doc.id}, stored password="${doc.data().password}", entered="${passwordInput}"`);
+            if (doc.data().password === passwordInput) {
+                matchedDoc = doc;
+            }
+        });
+
+        if (!matchedDoc) {
+            console.warn('[Login] Username found but password did not match.');
+            if (window.showModal) {
+                await window.showModal('Login Failed / लॉगिन अयशस्वी', 'Invalid username or password.');
+            } else {
+                alert('Invalid username or password.');
+            }
+            return;
+        }
+
+        const userData = matchedDoc.data();
+        console.log('[Login] Login successful. Role:', userData.role, 'Status:', userData.status);
+
+        if (userData.status === 'pending') {
+            if (window.showModal) {
+                await window.showModal('Account Pending / खाते प्रलंबित', 'Your account is currently awaiting approval from authorities.');
+            } else {
+                alert('Your account is currently awaiting approval from authorities.');
+            }
+            return;
+        }
+
+        // Save to localStorage
+        localStorage.setItem('userId', matchedDoc.id);
+        localStorage.setItem('userRole', userData.role);
+        localStorage.setItem('userName', userData.name || userData.username);
+        localStorage.setItem('userPhone', userData.phone || userData.username || '');
+
+        // Redirect to SPA dashboard
+        window.location.href = 'dashboard.html';
+
     } catch (error) {
         console.error("Error logging in:", error);
         if (window.showModal) {
@@ -102,7 +125,6 @@ window.handleRegister = async function(event, role) {
     try {
         let name, phone, password, status = 'approved', extraData = {};
         
-        // 1 & 2: Read fields based on role
         if (role === 'dindi_leader') {
             name = document.getElementById('regName_dindi_leader').value;
             phone = document.getElementById('regPhone_dindi_leader').value;
@@ -111,7 +133,7 @@ window.handleRegister = async function(event, role) {
             const photoFile = document.getElementById('leaderPhoto').files[0];
             let photoBase64 = null;
             if (photoFile) {
-                photoBase64 = await fileToBase64(photoFile); // Convert to base64 string
+                photoBase64 = await fileToBase64(photoFile);
             }
             
             extraData = {
@@ -146,10 +168,10 @@ window.handleRegister = async function(event, role) {
             status = 'approved';
         }
         
-        // Prepare user document payload
+        // Prepare user document — username is Full Name for login
         const newUser = {
             name: name,
-            username: name, // using Full Name as the username field in DB for logins
+            username: name, // Full Name used as the login username
             phone: phone,
             password: password,
             role: role,
@@ -158,10 +180,8 @@ window.handleRegister = async function(event, role) {
             createdAt: new Date().toISOString()
         };
         
-        // 5: Call addDoc
         await addDoc(collection(db, 'users'), newUser);
         
-        // 6: Show success message and redirect
         let successMsg = 'Registration successful! You can now log in.';
         if (status === 'pending') {
             successMsg = 'Registration successful! Your account is pending authority approval.';
