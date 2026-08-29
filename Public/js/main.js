@@ -1,4 +1,5 @@
 import { dict } from './dict.js';
+import { initSuperAdmin } from './modules/superadmin.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     // 1. Language Initialization
@@ -8,6 +9,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 2. Dashboard Gatekeeper
     setupGatekeeper();
+
+    // 3. Global Navigation Listeners
+    const navAlerts = document.getElementById('nav-alerts');
+    if (navAlerts) {
+        navAlerts.addEventListener('click', () => {
+            window.location.href = 'emergency_alert.html';
+        });
+    }
 });
 
 function applyTranslations(lang) {
@@ -104,6 +113,7 @@ function setupGatekeeper() {
     switch (userRole) {
         case 'super_admin':
             showElements('panel-super', ['nav-alerts', 'nav-map']);
+            initSuperAdmin();
             break;
         case 'authority':
             showElements('panel-authority', ['nav-alerts', 'nav-map']);
