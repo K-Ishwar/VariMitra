@@ -8,6 +8,10 @@ ehthumbs.db
 Desktop.ini
 $RECYCLE.BIN/
 
+# Dependencies
+node_modules/
+evolution-api/
+
 # Logs
 logs
 *.log

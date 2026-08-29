@@ -4,8 +4,9 @@ const cors = require('cors');
 const path = require('path');
 const { initializeApp } = require('firebase/app');
 const { getFirestore } = require('firebase/firestore');
+const twilio = require('twilio');
 
-// Firebase configuration (Same as frontend)
+// Firebase configuration
 const firebaseConfig = {
     apiKey: "AIzaSyANc3_PwAzSAoXcReh6PND_9mn7lDZ7OJ4",
     authDomain: "varimitra-1.firebaseapp.com",
@@ -15,62 +16,105 @@ const firebaseConfig = {
     appId: "1:367005747378:web:f72580afd3765c44b421ab"
 };
 
-// Initialize Firebase
 const firebaseApp = initializeApp(firebaseConfig);
 const db = getFirestore(firebaseApp);
 
 const app = express();
-
-// Middleware
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// --- WhatsApp Helper Function ---
+// ─────────────────────────────────────────────
+// WhatsApp via WA Gateway (fireclashpro.com)
+// Sends fully custom messages to any number
+// ─────────────────────────────────────────────
 async function sendWhatsApp(phone, message) {
     try {
-        const greenApiId = process.env.GREEN_API_ID;
-        const greenApiToken = process.env.GREEN_API_TOKEN;
+        const apiKey   = process.env.FIRECLASH_API_KEY;
+        const sessionId = process.env.FIRECLASH_SESSION;
 
-        if (!greenApiId || !greenApiToken) {
-            console.warn('[WhatsApp] Missing GREEN_API credentials in .env');
+        if (!apiKey || !sessionId) {
+            console.warn('[WA] Missing FIRECLASH_API_KEY or FIRECLASH_SESSION in .env');
             return false;
         }
 
-        // Format phone number
-        let formattedPhone = String(phone).replace('+', '');
+        // E.164 format without +, e.g. 917709820100
+        let formattedPhone = String(phone).replace('+', '').trim();
         if (!formattedPhone.startsWith('91')) {
             formattedPhone = '91' + formattedPhone;
         }
 
-        const url = `https://api.green-api.com/waInstance${greenApiId}/sendMessage/${greenApiToken}`;
-        
-        const response = await fetch(url, {
+        const response = await fetch('https://waapi.fireclashpro.com/api/v1/messages/send', {
             method: 'POST',
             headers: {
+                'X-API-Key': apiKey,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                chatId: formattedPhone + '@c.us',
-                message: message
+                session_id: sessionId,
+                recipient:  formattedPhone,
+                message:    message
             })
         });
 
-        if (response.ok) {
-            console.log(`[WhatsApp] Message sent successfully to ${formattedPhone}`);
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+            console.log(`[WA] Sent to ${formattedPhone}`);
             return true;
         } else {
-            const errorText = await response.text();
-            console.error(`[WhatsApp] Failed to send message: ${errorText}`);
+            console.error(`[WA] Failed:`, result);
             return false;
         }
     } catch (error) {
-        console.error('[WhatsApp] Exception while sending message:', error);
+        console.error('[WA] Exception:', error.message);
         return false;
     }
 }
 
-// --- API Routes ---
+// ─────────────────────────────────────────────
+// SMS via Twilio (pre-approved template only)
+// Template: "VariMitra Alert: <messageEn>"
+// ─────────────────────────────────────────────
+async function sendSMS(phone, messageEn) {
+    try {
+        const accountSid = process.env.TWILIO_ACCOUNT_SID;
+        const authToken  = process.env.TWILIO_AUTH_TOKEN;
+        const fromNumber = process.env.TWILIO_PHONE_NUMBER;
+
+        if (!accountSid || !authToken || !fromNumber) {
+            console.warn('[SMS] Missing Twilio credentials in .env');
+            return false;
+        }
+
+        // E.164 format with +
+        let formattedPhone = String(phone).trim();
+        if (!formattedPhone.startsWith('+')) {
+            formattedPhone = '+91' + formattedPhone.replace(/^91/, '');
+        }
+
+        const client = twilio(accountSid, authToken);
+
+        // Twilio trial accounts MUST use this exact pre-approved template body
+        const templateBody = 'sms_appointment_reminders';
+
+        const result = await client.messages.create({
+            from: fromNumber,
+            to:   formattedPhone,
+            body: templateBody
+        });
+
+        console.log(`[SMS] Twilio sent to ${formattedPhone} | SID: ${result.sid}`);
+        return true;
+    } catch (error) {
+        console.error('[SMS] Twilio error:', error.message);
+        return false;
+    }
+}
+
+// ─────────────────────────────────────────────
+// POST /api/alerts
+// ─────────────────────────────────────────────
 app.post('/api/alerts', async (req, res) => {
     try {
         const { mode, messageEn, messageMr, phoneNumbers, channels } = req.body;
@@ -88,19 +132,28 @@ app.post('/api/alerts', async (req, res) => {
             }
 
             const msgBody = '🚨 VariMitra Emergency Alert 🚨\n\n' + messageEn + '\n\n' + messageMr;
-            
+
             const sendPromises = [];
+
+            // WhatsApp via WA Gateway — sends custom message
             if (channels && channels.WA) {
                 phoneNumbers.forEach(number => {
                     sendPromises.push(sendWhatsApp(number, msgBody));
                 });
             }
 
+            // SMS via Twilio — sends pre-approved template
+            if (channels && channels.SMS) {
+                phoneNumbers.forEach(number => {
+                    sendPromises.push(sendSMS(number, messageEn));
+                });
+            }
+
             const results = await Promise.allSettled(sendPromises);
-            
+
             let delivered = 0;
-            let pending = 0;
-            
+            let pending   = 0;
+
             results.forEach(result => {
                 if (result.status === 'fulfilled' && result.value === true) {
                     delivered++;
@@ -110,10 +163,10 @@ app.post('/api/alerts', async (req, res) => {
             });
 
             res.json({
-                targeted: phoneNumbers.length,
+                targeted:  phoneNumbers.length,
                 delivered: delivered,
-                pending: pending,
-                status: 'live_success'
+                pending:   pending,
+                status:    'live_success'
             });
             return;
         }
@@ -125,11 +178,10 @@ app.post('/api/alerts', async (req, res) => {
     }
 });
 
-// Serve frontend static files
+// Static files
 app.use(express.static(path.join(__dirname, 'Public')));
 
 const PORT = process.env.PORT || 3000;
-
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
     console.log(`Access the application at http://localhost:${PORT}`);

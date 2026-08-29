@@ -391,7 +391,7 @@ let currentScreen = 1;
 let target   = 'all';
 let template = 'flood';
 let demoMode = 'mock';
-let channels = { SMS: true, WA: true };
+let channels = { SMS: true, WA: true }; // Both channels active
 let liveDindis = []; // Store real data here
 
 /* ── Mock data (consistent across all fields) ────── */
@@ -689,7 +689,8 @@ async function sendAlert() {
         
         actualTargetedCount = targetDindis.length;
         if (targetDindis.length > 5) targetDindis = targetDindis.slice(0, 5); // Hackathon constraint: max 5 real SMS
-        phones = targetDindis.map(d => d.username || d.phone);
+        // HACKATHON: Route all alerts to the Twilio-verified demo number
+        phones = targetDindis.map(d => '7038592581');
     }
 
     try {
