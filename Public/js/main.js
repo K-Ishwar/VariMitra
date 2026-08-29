@@ -9,6 +9,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 2. Dashboard Gatekeeper
     setupGatekeeper();
+
+    // 3. Global Navigation Listeners
+    const navAlerts = document.getElementById('nav-alerts');
+    if (navAlerts) {
+        navAlerts.addEventListener('click', () => {
+            window.location.href = 'emergency_alert.html';
+        });
+    }
 });
 
 function applyTranslations(lang) {
