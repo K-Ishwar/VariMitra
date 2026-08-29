@@ -8,47 +8,93 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
     <link rel="stylesheet" href="CSS/style.css">
     <style>
-        /* Hidden by default as per SPA design */
-        .nav-btn {
-            display: none;
-            background: none;
-            border: none;
-            font-family: inherit;
-            font-size: 14px;
-            color: var(--ink);
-            cursor: pointer;
-            padding: 8px 12px;
-            font-weight: 500;
-        }
-
-        .nav-btn:hover {
-            text-decoration: underline;
-            color: var(--marigold-deep);
-        }
-
-        .logout-btn {
-            color: var(--vermilion);
-        }
-
-        .logout-btn:hover {
-            color: var(--vermilion);
-            text-decoration: underline;
-        }
-
-        .nav-links {
+        /* Navigation Bar overrides */
+        .navbar {
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 12px;
-            flex-wrap: wrap;
+            padding: 12px 32px;
+            background: white;
+            border-bottom: 1px solid var(--line);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            margin: 0 -16px; /* Counteract container padding */
+        }
+        
+        .nav-left { display: flex; align-items: center; gap: 12px; }
+        .badge-beta {
+            background: var(--marigold); color: var(--ink);
+            font-size: 10px; font-weight: 700; padding: 4px 10px;
+            border-radius: 99px; letter-spacing: 0.5px;
         }
 
-        .dashboard-content {
-            padding: 32px 0;
+        .nav-center { display: flex; gap: 24px; align-items: center; }
+        
+        /* Nav links */
+        .nav-btn {
+            display: none; /* Controlled by JS auth */
+            background: none; border: none; font-family: inherit; font-size: 14px;
+            font-weight: 600; color: #5a5140; cursor: pointer; padding: 8px 0;
+            position: relative;
+        }
+        .nav-btn:hover { color: var(--ink); }
+        .nav-btn::after {
+            content: ''; position: absolute; bottom: 0; left: 0; width: 0;
+            height: 2px; background: var(--marigold); transition: width 0.2s;
+        }
+        .nav-btn:hover::after { width: 100%; }
+        
+        /* Active State */
+        .nav-btn.active { color: var(--ink); }
+        .nav-btn.active::after {
+            content: ''; position: absolute; bottom: -4px; left: 50%; transform: translateX(-50%);
+            width: 5px; height: 5px; border-radius: 50%; background: var(--marigold);
         }
 
-        .role-panel {
-            display: none;
+        .nav-right { display: flex; align-items: center; gap: 16px; }
+        
+        /* User Identity Pill */
+        .user-pill {
+            display: flex; align-items: center; gap: 8px; background: var(--paper-2);
+            padding: 4px 12px 4px 4px; border-radius: 99px; border: 1px solid var(--line);
         }
+        .user-avatar {
+            width: 28px; height: 28px; border-radius: 50%; background: var(--night);
+            color: white; display: flex; align-items: center; justify-content: center;
+            font-size: 12px; font-weight: 700;
+        }
+        .user-role-text { font-size: 13px; font-weight: 600; color: var(--ink); margin-right: 4px; }
+
+        .logout-btn-new {
+            background: transparent; border: 1.5px solid var(--vermilion); color: var(--vermilion);
+            padding: 6px 16px; border-radius: 99px; font-size: 13px; font-weight: 600;
+            cursor: pointer; transition: all 0.2s; font-family: inherit;
+        }
+        .logout-btn-new:hover { background: var(--vermilion); color: white; }
+
+        .hamburger { display: none; background: none; border: none; font-size: 24px; cursor: pointer; color: var(--ink); }
+        
+        .mobile-menu-wrapper { display: contents; }
+
+        @media (max-width: 950px) {
+            .navbar { padding: 12px 16px; }
+            .mobile-menu-wrapper {
+                position: absolute; top: 100%; left: 0; right: 0; background: white;
+                border-bottom: 1px solid var(--line); display: none; flex-direction: column;
+                box-shadow: 0 10px 20px rgba(0,0,0,0.05); padding-bottom: 16px;
+            }
+            .mobile-menu-wrapper.open { display: flex; }
+            .nav-center { flex-direction: column; gap: 0; align-items: stretch; width: 100%; }
+            .nav-btn { padding: 16px; border-bottom: 1px solid var(--paper-2); text-align: left; }
+            .nav-btn::after { display: none !important; }
+            
+            .nav-right { flex-direction: column; align-items: stretch; padding: 16px; gap: 16px; }
+            .hamburger { display: block; }
+        }
+
+        .dashboard-content { padding: 32px 0; }
+        .role-panel { display: none; }
     </style>
 </head>
 
@@ -56,33 +102,42 @@
 
     <div class="app-container">
         <nav class="navbar">
-            <div class="wordmark">Vari<span>Mitra</span></div>
+            <div class="nav-left">
+                <div class="wordmark">Vari<span>Mitra</span></div>
+                <div class="badge-beta">BETA</div>
+            </div>
 
-            <div class="nav-links">
-                <!-- Role-specific Nav Buttons (all hidden by default) -->
-                <button id="nav-alerts" class="nav-btn" data-i18n="nav_alerts">Emergency Alerts</button>
-                <button id="nav-seva" class="nav-btn" data-i18n="nav_seva">Anna Setu</button>
-                <button id="nav-lostfound" class="nav-btn" data-i18n="nav_lostfound">Lost & Found</button>
-                <button id="nav-sanitation" class="nav-btn" data-i18n="nav_sanitation">Sanitation</button>
-                <button id="nav-map" class="nav-btn" data-i18n="nav_map">Live Map</button>
-
-                <!-- Language Toggle -->
-                <div class="langtoggle" style="margin-left: 8px; margin-right: 8px;">
-                    <button id="btnEN" class="active">EN</button>
-                    <button id="btnMR">MR</button>
+            <div class="mobile-menu-wrapper" id="mobileMenu">
+                <div class="nav-center">
+                    <!-- Role-specific Nav Buttons -->
+                    <button id="nav-alerts" class="nav-btn" data-i18n="nav_alerts">Emergency Alerts</button>
+                    <button id="nav-seva" class="nav-btn" data-i18n="nav_seva">Anna Setu</button>
+                    <button id="nav-lostfound" class="nav-btn" data-i18n="nav_lostfound">Lost & Found</button>
+                    <button id="nav-sanitation" class="nav-btn" data-i18n="nav_sanitation">Sanitation</button>
+                    <button id="nav-map" class="nav-btn" data-i18n="nav_map">Live Map</button>
                 </div>
 
-                <!-- Logout Button -->
-                <button id="nav-logout" class="nav-btn logout-btn" data-i18n="logout">Log Out</button>
+                <div class="nav-right">
+                    <div class="user-pill">
+                        <div class="user-avatar" id="navAvatar">U</div>
+                        <span id="displayRole" class="user-role-text">Loading...</span>
+                    </div>
+
+                    <!-- Language Toggle -->
+                    <div class="langtoggle">
+                        <button id="btnEN" class="active">EN</button>
+                        <button id="btnMR">MR</button>
+                    </div>
+
+                    <!-- Logout Button -->
+                    <button id="nav-logout" class="logout-btn-new" data-i18n="logout">Log Out</button>
+                </div>
             </div>
+            
+            <button class="hamburger" onclick="document.getElementById('mobileMenu').classList.toggle('open')">☰</button>
         </nav>
 
         <main class="dashboard-content">
-            <div style="margin-bottom: 24px;">
-                <h2 style="margin: 0; font-size: 24px;"><span data-i18n="welcome">Welcome</span>, <span id="displayRole"
-                        style="color: var(--marigold-deep);">User</span></h2>
-            </div>
-
             <!-- SPA Role Panels (all hidden by default) -->
             <div id="panel-super" class="role-panel">
                 <!-- Top Stats Bar -->
@@ -195,56 +250,112 @@
                 </div>
             </div>
 
-            <div id="panel-dindi" class="role-panel card">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                    <h3 data-i18n="title_dindi" style="margin: 0;">Dindi Leader Dashboard</h3>
-                </div>
-
-                <!-- Tabs for Dindi Leader -->
-                <div style="display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid var(--line); padding-bottom: 12px; overflow-x: auto;">
-                    <button class="btn-primary" id="tab-dindi-route" onclick="window.switchDindiTab('route')" style="background-color: var(--night);">Route Planner</button>
-                    <button class="btn-primary" id="tab-dindi-registry" onclick="window.switchDindiTab('registry')" style="background-color: var(--paper-2); color: var(--ink);">Pilgrim Registry</button>
-                </div>
-
-                <!-- Tab 1: Route Planner -->
-                <div id="dindi-content-route">
-                    <div id="dindiMap"
-                        style="height: 400px; width: 100%; margin-top: 16px; margin-bottom: 24px; border-radius: 8px; border: 1px solid var(--line); z-index: 1;">
-                    </div>
+            <div id="panel-dindi" class="role-panel" style="background: transparent; border: none; padding: 0;">
+                <div style="display: flex; gap: 24px; flex-wrap: wrap;">
                     
-                    <div id="savedRouteView" style="display: none; margin-top: 16px;"></div>
-
-                <div id="dindiPlannerSetup">
-                    <div style="position: relative; margin-top: 16px; z-index: 1000;">
-                        <label for="startVillageInput"
-                            style="display:block; margin-bottom: 8px; font-weight: 500;">Starting Village</label>
-                        <input type="text" id="startVillageInput" class="input-field"
-                            placeholder="Search Starting Village..." oninput="window.searchStartLocation(this.value)">
-                        <div id="startVillageDropdown" class="autocomplete-results"></div>
-                    </div>
-
-                    <div style="display: flex; gap: 16px; margin-top: 16px;">
-                        <div style="flex: 1;">
-                            <label for="startDate" style="display:block; margin-bottom: 8px; font-weight: 500;">Start
-                                Date</label>
-                            <input type="date" id="startDate" class="input-field" required>
-                        </div>
-                        <div style="flex: 1;">
-                            <label for="endDate" style="display:block; margin-bottom: 8px; font-weight: 500;">End Date
-                                (Pandharpur)</label>
-                            <input type="date" id="endDate" class="input-field" required>
+                    <!-- Left Sidebar (30%) -->
+                    <div class="card" style="flex: 1 1 250px; padding: 24px 16px;">
+                        <h3 style="margin-top: 0; margin-bottom: 24px; font-size: 16px; color: var(--sage);">Dindi Controls</h3>
+                        
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <button class="nav-btn dindi-tab-btn active" onclick="window.switchDindiTab('route', event)" style="display: block; width: 100%; text-align: left; padding: 12px 16px; border-left: 3px solid var(--marigold); background: var(--paper-2); color: var(--ink); border-radius: 0 8px 8px 0; font-weight: 600;">
+                                🗺️ Route Planner
+                            </button>
+                            <button class="nav-btn dindi-tab-btn" onclick="window.switchDindiTab('registry', event)" style="display: block; width: 100%; text-align: left; padding: 12px 16px; border-left: 3px solid transparent; color: #8A7D63; border-radius: 0 8px 8px 0; font-weight: 600; background: transparent;">
+                                👥 Pilgrim Registry
+                            </button>
                         </div>
                     </div>
 
-                    <button class="btn-primary" style="margin-top: 16px; width: 100%;"
-                        onclick="window.generateRouteForm()">Generate Route Form</button>
+                    <!-- Main Content (70%) -->
+                    <div style="flex: 3 1 500px;">
+                        
+                        <!-- Route Planner Tab Content -->
+                        <div id="dindi-tab-route" class="dindi-tab-content">
+                            <div class="card" style="margin-bottom: 24px;">
+                                <h3 style="margin-top: 0; margin-bottom: 16px;">Route Planner</h3>
+                                
+                                <div id="dindiMap" style="height: 350px; width: 100%; margin-bottom: 24px; border-radius: 16px; border: 1px solid var(--line); z-index: 1;"></div>
+                                
+                                <div id="savedRouteView" style="display: none; margin-bottom: 16px;"></div>
+                                
+                                <div id="dindiPlannerSetup">
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+                                        <div style="position: relative; z-index: 1000;">
+                                            <label for="startVillageInput" style="display:block; margin-bottom: 8px; font-weight: 500;">Start Location</label>
+                                            <div style="position: relative;">
+                                                <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 16px;">📍</span>
+                                                <input type="text" id="startVillageInput" class="input-field" placeholder="Search Starting Village..." oninput="window.searchStartLocation(this.value)" style="padding-left: 40px; box-sizing: border-box; width: 100%;">
+                                            </div>
+                                            <div id="startVillageDropdown" class="autocomplete-results"></div>
+                                        </div>
 
-                    <!-- Container for generated day rows -->
-                    <div id="routePlanContainer" style="margin-top: 24px;"></div>
+                                        <div>
+                                            <label for="startDate" style="display:block; margin-bottom: 8px; font-weight: 500;">Journey Start Date</label>
+                                            <input type="date" id="startDate" class="input-field" required>
+                                        </div>
+                                    </div>
 
-                    <button id="submitRouteBtn" class="btn-primary"
-                        style="margin-top: 16px; width: 100%; display: none; background: #43A047; color: white; border: none; font-weight: 600;"
-                        onclick="window.submitDindiRoute()">Submit Route to Database</button>
+                                    <!-- Hidden end date for compatibility -->
+                                    <div style="display: none;">
+                                        <label for="endDate">End Date</label>
+                                        <input type="date" id="endDate" class="input-field" value="2026-07-23">
+                                    </div>
+
+                                    <div style="text-align: center;">
+                                        <button class="btn-primary" style="padding: 12px 32px;" onclick="window.generateRouteForm()">Generate Day Plan</button>
+                                    </div>
+
+                                    <!-- Container for generated day rows -->
+                                    <div id="routePlanContainer" style="margin-top: 24px;"></div>
+
+                                    <button id="submitRouteBtn" class="btn-primary" style="margin-top: 16px; width: 100%; display: none; background: #43A047; color: white; border: none; font-weight: 600;" onclick="window.submitDindiRoute()">Submit Route to Database</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pilgrim Registry Tab Content -->
+                        <div id="dindi-tab-registry" class="dindi-tab-content" style="display: none;">
+                            <div class="card" style="margin-bottom: 24px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+                                    <h3 style="margin: 0;">Pilgrim Registry</h3>
+                                    <button class="btn-primary" style="background-color: var(--marigold); color: var(--ink); padding: 8px 16px;" onclick="document.getElementById('profile-drawer').classList.add('open')">+ Register New Pilgrim</button>
+                                </div>
+                                
+                                <div id="pilgrim-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;">
+                                    <!-- Placeholder Pilgrim 1 -->
+                                    <div style="border: 1px solid var(--line); border-radius: 12px; padding: 16px; display: flex; align-items: center; justify-content: space-between; background: var(--paper-2);">
+                                        <div style="display: flex; align-items: center; gap: 12px;">
+                                            <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--night); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600;">S</div>
+                                            <div>
+                                                <div style="font-weight: 600; font-size: 15px; color: var(--ink);">Sudhir Patil</div>
+                                                <div style="font-size: 12px; color: var(--sage);">Pune</div>
+                                            </div>
+                                        </div>
+                                        <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                                            <span style="background: rgba(193, 67, 43, 0.1); color: var(--vermilion); padding: 2px 8px; border-radius: 50px; font-size: 11px; font-weight: 700;">O+</span>
+                                            <button style="background: none; border: 1px solid var(--line); padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; color: var(--ink);">View QR Badge</button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Placeholder Pilgrim 2 -->
+                                    <div style="border: 1px solid var(--line); border-radius: 12px; padding: 16px; display: flex; align-items: center; justify-content: space-between; background: var(--paper-2);">
+                                        <div style="display: flex; align-items: center; gap: 12px;">
+                                            <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--night); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600;">A</div>
+                                            <div>
+                                                <div style="font-weight: 600; font-size: 15px; color: var(--ink);">Anil Deshmukh</div>
+                                                <div style="font-size: 12px; color: var(--sage);">Solapur</div>
+                                            </div>
+                                        </div>
+                                        <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                                            <span style="background: rgba(193, 67, 43, 0.1); color: var(--vermilion); padding: 2px 8px; border-radius: 50px; font-size: 11px; font-weight: 700;">B+</span>
+                                            <button style="background: none; border: 1px solid var(--line); padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; color: var(--ink);">View QR Badge</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 </div> <!-- End of Route Planner Tab -->
 
@@ -378,6 +489,38 @@
 
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const userName = localStorage.getItem('userName');
+            if(userName && userName.length > 0) {
+                const avatar = document.getElementById('navAvatar');
+                if (avatar) avatar.textContent = userName.charAt(0).toUpperCase();
+            }
+        });
+
+        window.switchDindiTab = function(tabId, event) {
+            document.querySelectorAll('.dindi-tab-btn').forEach(btn => {
+                btn.style.borderLeftColor = 'transparent';
+                btn.style.background = 'transparent';
+                btn.style.color = '#8A7D63';
+                btn.classList.remove('active');
+            });
+            event.currentTarget.style.borderLeftColor = 'var(--marigold)';
+            event.currentTarget.style.background = 'var(--paper-2)';
+            event.currentTarget.style.color = 'var(--ink)';
+            event.currentTarget.classList.add('active');
+            
+            document.querySelectorAll('.dindi-tab-content').forEach(content => {
+                content.style.display = 'none';
+            });
+            document.getElementById('dindi-tab-' + tabId).style.display = 'block';
+            
+            // Trigger a map resize to fix Leaflet rendering if Map tab was selected
+            if (tabId === 'route' && window.map) {
+                setTimeout(() => window.map.invalidateSize(), 100);
+            }
+        };
+    </script>
     <!-- Application Scripts -->
     <script type="module" src="js/config.js"></script>
     <script type="module" src="js/main.js"></script>

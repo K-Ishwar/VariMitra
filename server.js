@@ -70,6 +70,61 @@ async function sendWhatsApp(phone, message) {
     }
 }
 
+// --- API Routes ---
+app.post('/api/alerts', async (req, res) => {
+    try {
+        const { mode, messageEn, messageMr, phoneNumbers, channels } = req.body;
+
+        if (mode === 'mock') {
+            setTimeout(() => {
+                res.json({ targeted: 4500, delivered: 4421, pending: 79, status: 'mock_success' });
+            }, 1500);
+            return;
+        }
+
+        if (mode === 'live') {
+            if (!phoneNumbers || phoneNumbers.length === 0) {
+                return res.status(400).json({ error: 'No phone numbers provided.' });
+            }
+
+            const msgBody = '🚨 VariMitra Emergency Alert 🚨\n\n' + messageEn + '\n\n' + messageMr;
+            
+            const sendPromises = [];
+            if (channels && channels.WA) {
+                phoneNumbers.forEach(number => {
+                    sendPromises.push(sendWhatsApp(number, msgBody));
+                });
+            }
+
+            const results = await Promise.allSettled(sendPromises);
+            
+            let delivered = 0;
+            let pending = 0;
+            
+            results.forEach(result => {
+                if (result.status === 'fulfilled' && result.value === true) {
+                    delivered++;
+                } else {
+                    pending++;
+                }
+            });
+
+            res.json({
+                targeted: phoneNumbers.length,
+                delivered: delivered,
+                pending: pending,
+                status: 'live_success'
+            });
+            return;
+        }
+
+        res.status(400).json({ error: 'Invalid mode.' });
+    } catch (error) {
+        console.error('Error in /api/alerts:', error);
+        res.status(500).json({ error: 'Internal server error.' });
+    }
+});
+
 // Serve frontend static files
 app.use(express.static(path.join(__dirname, 'Public')));
 

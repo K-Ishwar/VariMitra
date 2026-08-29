@@ -22,11 +22,18 @@ export const dict = {
         title_public: 'Civilian Dashboard',
         
         // Auth / Login
-        auth_subtitle: 'Pilgrimage Management System',
-        auth_username: 'Username',
+        auth_main_title: 'Wari Management System',
+        auth_main_subtitle: 'Smart Pilgrimage Infrastructure for 3 Million People.',
+        auth_stat_1: '🚶 2.1M Pilgrims',
+        auth_stat_2: '🏕️ 500+ Dindis',
+        auth_stat_3: '📍 200km Route',
+        auth_welcome: 'Welcome Back',
+        auth_username: 'Username / Phone Number',
         auth_pass: 'Password',
-        auth_login_btn: 'Login',
-        auth_reg_link: 'New User? Register Here',
+        auth_login_btn: 'Sign In',
+        auth_reg_link: 'New here? Register as a Pilgrim or NGO →',
+        auth_show: 'SHOW',
+        auth_hide: 'HIDE',
         
         // Registration
         reg_title: 'VariMitra Registration',
@@ -77,11 +84,18 @@ export const dict = {
         title_public: 'नागरिक डॅशबोर्ड',
 
         // Auth / Login
-        auth_subtitle: 'वारी व्यवस्थापन प्रणाली',
-        auth_username: 'वापरकर्तानाव',
+        auth_main_title: 'वारी व्यवस्थापन प्रणाली',
+        auth_main_subtitle: '३ दशलक्ष लोकांसाठी स्मार्ट तीर्थयात्रा पायाभूत सुविधा.',
+        auth_stat_1: '🚶 २.१ दशलक्ष वारकरी',
+        auth_stat_2: '🏕️ ५००+ दिंड्या',
+        auth_stat_3: '📍 २०० किमी मार्ग',
+        auth_welcome: 'पुन्हा स्वागत आहे',
+        auth_username: 'वापरकर्तानाव / फोन नंबर',
         auth_pass: 'संकेतशब्द',
-        auth_login_btn: 'लॉगिन',
-        auth_reg_link: 'नवीन वापरकर्ता? येथे नोंदणी करा',
+        auth_login_btn: 'साइन इन करा',
+        auth_reg_link: 'नवीन आहात? वारकरी किंवा संस्था म्हणून नोंदणी करा →',
+        auth_show: 'दाखवा',
+        auth_hide: 'लपवा',
 
         // Registration
         reg_title: 'वारीमित्र नोंदणी',
