@@ -104,7 +104,6 @@
         <nav class="navbar">
             <div class="nav-left">
                 <div class="wordmark">Vari<span>Mitra</span></div>
-                <div class="badge-beta">BETA</div>
             </div>
 
             <div class="mobile-menu-wrapper" id="mobileMenu">
@@ -112,7 +111,6 @@
                     <!-- Role-specific Nav Buttons -->
                     <button id="nav-alerts" class="nav-btn" data-i18n="nav_alerts">Emergency Alerts</button>
                     <button id="nav-seva" class="nav-btn" data-i18n="nav_seva">Anna Setu</button>
-                    <button id="nav-lostfound" class="nav-btn" data-i18n="nav_lostfound">Lost & Found</button>
                     <button id="nav-sanitation" class="nav-btn" data-i18n="nav_sanitation">Sanitation</button>
                     <button id="nav-map" class="nav-btn" data-i18n="nav_map">Live Map</button>
                 </div>
@@ -258,11 +256,14 @@
                         <h3 style="margin-top: 0; margin-bottom: 24px; font-size: 16px; color: var(--sage);">Dindi Controls</h3>
                         
                         <div style="display: flex; flex-direction: column; gap: 8px;">
-                            <button class="nav-btn dindi-tab-btn active" onclick="window.switchDindiTab('route', event)" style="display: block; width: 100%; text-align: left; padding: 12px 16px; border-left: 3px solid var(--marigold); background: var(--paper-2); color: var(--ink); border-radius: 0 8px 8px 0; font-weight: 600;">
+                            <button class="nav-btn dindi-tab-btn active" onclick="window.switchDindiTab('route', event)" style="display: block; width: 100%; text-align: left; padding: 12px 16px; border-left: 3px solid var(--marigold); background: var(--paper-2); color: var(--ink); border-radius: 0 8px 0 0; font-weight: 600;">
                                 🗺️ Route Planner
                             </button>
-                            <button class="nav-btn dindi-tab-btn" onclick="window.switchDindiTab('registry', event)" style="display: block; width: 100%; text-align: left; padding: 12px 16px; border-left: 3px solid transparent; color: #8A7D63; border-radius: 0 8px 8px 0; font-weight: 600; background: transparent;">
+                            <button class="nav-btn dindi-tab-btn" onclick="window.switchDindiTab('registry', event)" style="display: block; width: 100%; text-align: left; padding: 12px 16px; border-left: 3px solid transparent; color: #8A7D63; border-radius: 0; font-weight: 600; background: transparent;">
                                 👥 Pilgrim Registry
+                            </button>
+                            <button class="nav-btn dindi-tab-btn" onclick="window.switchDindiTab('lostfound', event)" style="display: block; width: 100%; text-align: left; padding: 12px 16px; border-left: 3px solid transparent; color: #8A7D63; border-radius: 0 0 8px 0; font-weight: 600; background: transparent;">
+                                🔍 Lost & Found
                             </button>
                         </div>
                     </div>
@@ -393,6 +394,21 @@
                                 </form>
                             </div>
                         </div>
+
+                        <!-- Lost & Found Tab Content -->
+                        <div id="dindi-tab-lostfound" class="dindi-tab-content" style="display: none;">
+                            <div class="card" style="margin-bottom: 24px; border-top: 4px solid var(--marigold-deep);">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                                    <h3 style="margin: 0; color: var(--marigold-deep);">Lost & Found</h3>
+                                    <span id="lostCountBadgeDindi" style="background: var(--vermilion); color: white; border-radius: 12px; padding: 2px 8px; font-size: 12px; font-weight: bold; display: none;">0</span>
+                                </div>
+                                <p style="font-size: 14px; color: var(--sage); margin-bottom: 16px;">Real-time alerts for lost pilgrims.</p>
+                                <div id="lostPilgrimsFeedDindi" style="max-height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;">
+                                    <div style="text-align: center; color: var(--ink); font-size: 13px; padding: 16px;">No alerts currently active.</div>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
                 </div> <!-- End of Route Planner Tab -->

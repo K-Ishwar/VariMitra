@@ -28,28 +28,7 @@ window.initDindiMap = function() {
         .bindTooltip("Pandharpur", { permanent: true, direction: 'right' });
 };
 
-window.switchDindiTab = function(tabId) {
-    const routeTab = document.getElementById('dindi-content-route');
-    const registryTab = document.getElementById('dindi-content-registry');
-    const routeBtn = document.getElementById('tab-dindi-route');
-    const registryBtn = document.getElementById('tab-dindi-registry');
 
-    if (tabId === 'route') {
-        routeTab.style.display = 'block';
-        registryTab.style.display = 'none';
-        routeBtn.style.backgroundColor = 'var(--night)';
-        routeBtn.style.color = 'white';
-        registryBtn.style.backgroundColor = 'var(--paper-2)';
-        registryBtn.style.color = 'var(--ink)';
-    } else {
-        routeTab.style.display = 'none';
-        registryTab.style.display = 'block';
-        registryBtn.style.backgroundColor = 'var(--night)';
-        registryBtn.style.color = 'white';
-        routeBtn.style.backgroundColor = 'var(--paper-2)';
-        routeBtn.style.color = 'var(--ink)';
-    }
-};
 
 window.toggleMedicalOther = function(val) {
     const otherInput = document.getElementById('pilgrimMedicalOther');
@@ -243,8 +222,8 @@ window.generatePilgrimID = function(pilgrimId, pilgrimName, photoUrl) {
         photoContainer.innerHTML = `<div style="width: 100%; height: 100%; background: var(--paper); display: flex; align-items: center; justify-content: center; font-size: 48px;">👤</div>`;
     }
 
-    // Generate QR Code URL
-    const publicUrl = window.location.origin + '/pilgrim.html?id=' + pilgrimId;
+    // Generate QR Code URL using the production domain, NOT localhost
+    const publicUrl = 'https://varimitra-1.web.app/pilgrim.html?id=' + pilgrimId;
     const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(publicUrl)}`;
     qrContainer.innerHTML = `<img src="${qrApiUrl}" alt="QR Code" style="width: 120px; height: 120px;">`;
 
@@ -269,13 +248,16 @@ window.initDindiLeader = async function() {
     const userId = localStorage.getItem('userId');
     if (!userId) return;
     
+    await window.fetchAndRenderPilgrims();
+    if (window.initLostPilgrimsFeed) {
+        window.initLostPilgrimsFeed();
+    }
+
     try {
         const docSnap = await getDoc(doc(db, 'dindiRoutes', userId));
         if (docSnap.exists()) {
             window.loadSavedRoute(docSnap.data());
         }
-        
-        // Also fetch their pilgrims
         window.fetchAndRenderPilgrims();
     } catch (e) {
         console.error("Error loading saved route:", e);
@@ -1140,3 +1122,82 @@ window.setupCustomViaSearch = function(dayIndex) {
         }, 500);
     };
 };
+
+window.initLostPilgrimsFeed = function() {
+    const feedAuth = document.getElementById('lostPilgrimsFeed');
+    const badgeAuth = document.getElementById('lostCountBadge');
+    
+    const feedDindi = document.getElementById('lostPilgrimsFeedDindi');
+    const badgeDindi = document.getElementById('lostCountBadgeDindi');
+
+    // We can just use the global db variable exported from config or imported in main.js
+    // but dindi.js doesn't seem to import it at the top, wait, it must, otherwise addDoc fails.
+    const { collection, query, orderBy, onSnapshot, doc, deleteDoc } = window.firebaseFirestore || {};
+    
+    // We will just use the global scope or imported functions if available.
+    // Assuming query, collection, orderBy, onSnapshot, etc. are available globally or we use the modular approach from main.js?
+    // Wait, let's use the exact same imports that were in dindi.js for db and collection.
+    // In dindi.js, we already have query, collection, db, etc.
+    const q = window.firestoreQuery || query(collection(db, 'lostReports'), orderBy('reportedAt', 'desc'));
+    
+    onSnapshot(q, (snapshot) => {
+        let html = '';
+        let count = 0;
+        
+        snapshot.forEach((docSnap) => {
+            const data = docSnap.data();
+            if (data.status === 'active') {
+                count++;
+                const timeStr = new Date(data.reportedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+                
+                html += `
+                    <div style="background: var(--paper); border-left: 4px solid var(--vermilion); padding: 12px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                            <strong style="color: var(--ink); font-size: 14px;">${data.pilgrimName}</strong>
+                            <span style="color: var(--sage); font-size: 11px;">${timeStr}</span>
+                        </div>
+                        <div style="font-size: 12px; color: var(--ink); margin-bottom: 4px;">
+                            📍 <a href="${data.googleMapsLink}" target="_blank" style="color: var(--marigold-deep); text-decoration: underline;">${data.locationName || 'View Location'}</a>
+                        </div>
+                        <div style="font-size: 12px; color: var(--sage);">
+                            📞 Reported by: ${data.reporterPhone}
+                        </div>
+                        <div style="margin-top: 8px;">
+                            <button onclick="window.resolveLostReport('${docSnap.id}')" style="background: var(--success); color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer;">Mark as Found</button>
+                        </div>
+                    </div>
+                `;
+            }
+        });
+
+        if (count === 0) {
+            html = '<div style="text-align: center; color: var(--ink); font-size: 13px; padding: 16px;">No alerts currently active.</div>';
+            if (badgeAuth) badgeAuth.style.display = 'none';
+            if (badgeDindi) badgeDindi.style.display = 'none';
+        } else {
+            if (badgeAuth) {
+                badgeAuth.style.display = 'inline-block';
+                badgeAuth.innerText = count;
+            }
+            if (badgeDindi) {
+                badgeDindi.style.display = 'inline-block';
+                badgeDindi.innerText = count;
+            }
+        }
+        
+        if (feedAuth) feedAuth.innerHTML = html;
+        if (feedDindi) feedDindi.innerHTML = html;
+    });
+};
+
+window.resolveLostReport = async function(reportId) {
+    if (!confirm("Has this pilgrim been found and safely returned?")) return;
+    try {
+        await deleteDoc(doc(db, 'lostReports', reportId));
+    } catch (error) {
+        console.error("Error resolving report:", error);
+        alert("Failed to update status.");
+    }
+};
+
+window.initAuthorityDashboard = window.initLostPilgrimsFeed;
