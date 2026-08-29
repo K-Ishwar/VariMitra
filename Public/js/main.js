@@ -86,7 +86,13 @@ function setupGatekeeper() {
 
     // Set role name in the UI using current language
     const lang = localStorage.getItem('lang') || 'en';
-    displayRole.innerText = dict[lang][`role_${userRole}`] || userRole;
+    const userName = localStorage.getItem('userName');
+    
+    if (userName) {
+        displayRole.innerText = userName;
+    } else {
+        displayRole.innerText = dict[lang][`role_${userRole}`] || userRole;
+    }
 
     // Helper function to unhide elements
     const showElements = (panelId, navIds) => {
@@ -115,9 +121,9 @@ function setupGatekeeper() {
         case 'dindi_leader':
         case 'dindi_helper':
             showElements('panel-dindi', ['nav-lostfound']);
-            if (window.initDindiMap) {
-                // slight delay to ensure div is rendered with dimensions before Leaflet initializes
-                setTimeout(() => window.initDindiMap(), 50);
+            if (window.initDindiLeader) {
+                // Initialize map and fetch saved route
+                setTimeout(() => window.initDindiLeader(), 50);
             }
             break;
         case 'ngo':
