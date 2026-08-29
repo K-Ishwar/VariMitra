@@ -65,49 +65,33 @@
 
     <div class="lang-container">
         <div class="langtoggle">
-            <button id="btn-en" class="active" onclick="setLanguage('en')">EN</button>
-            <button id="btn-mr" onclick="setLanguage('mr')">MR</button>
+            <button id="btnEN" class="active">EN</button>
+            <button id="btnMR">MR</button>
         </div>
     </div>
 
     <div class="card login-card">
         <div class="wordmark" style="font-size: 32px;">Vari<span>Mitra</span></div>
-        <div class="subtitle" data-en="Pilgrimage Management System" data-mr="वारी व्यवस्थापन प्रणाली">Pilgrimage Management System</div>
+        <div class="subtitle" data-i18n="auth_subtitle">Pilgrimage Management System</div>
         
         <form onsubmit="window.handleLogin(event)">
             <div class="form-group">
-                <label for="username" data-en="Username" data-mr="वापरकर्तानाव">Username</label>
-                <input type="text" id="username" class="input-field" placeholder="Enter your username" data-en-placeholder="Enter your username" data-mr-placeholder="तुमचे वापरकर्तानाव प्रविष्ट करा" required>
+                <label for="username" data-i18n="auth_username">Username</label>
+                <input type="text" id="username" class="input-field" placeholder="Username" data-i18n-placeholder="auth_username" required>
             </div>
             
             <div class="form-group">
-                <label for="loginPass" data-en="Password" data-mr="संकेतशब्द">Password</label>
-                <input type="password" id="loginPass" class="input-field" placeholder="Enter your password" data-en-placeholder="Enter your password" data-mr-placeholder="तुमचा संकेतशब्द प्रविष्ट करा" required>
+                <label for="loginPass" data-i18n="auth_pass">Password</label>
+                <input type="password" id="loginPass" class="input-field" placeholder="Password" data-i18n-placeholder="auth_pass" required>
             </div>
             
-            <button type="submit" class="btn-primary submit-btn" data-en="Login" data-mr="लॉगिन">Login</button>
+            <button type="submit" class="btn-primary submit-btn" data-i18n="auth_login_btn">Login</button>
         </form>
         
-        <a href="register.html" class="register-link" data-en="New User? Register Here" data-mr="नवीन वापरकर्ता? येथे नोंदणी करा">New User? Register Here</a>
+        <a href="register.html" class="register-link" data-i18n="auth_reg_link">New User? Register Here</a>
     </div>
 
     <script>
-        function setLanguage(lang) {
-            // Update active button styling
-            document.getElementById('btn-en').classList.toggle('active', lang === 'en');
-            document.getElementById('btn-mr').classList.toggle('active', lang === 'mr');
-            
-            // Update standard text content
-            document.querySelectorAll('[data-en]').forEach(el => {
-                el.textContent = el.getAttribute(`data-${lang}`);
-            });
-            
-            // Update placeholders for inputs
-            document.querySelectorAll('[data-en-placeholder]').forEach(el => {
-                el.setAttribute('placeholder', el.getAttribute(`data-${lang}-placeholder`));
-            });
-        }
-        
         // Dummy handleLogin to prevent form from submitting natively
         window.handleLogin = function(event) {
             event.preventDefault();

@@ -3,15 +3,15 @@ import { getFirestore } from 'https://www.gstatic.com/firebasejs/10.12.2/firebas
 
 // TODO: Replace with your actual Firebase project configuration keys
 const firebaseConfig = {
-    apiKey: "YOUR_FIREBASE_API_KEY",
-    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT_ID.appspot.com",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyANc3_PwAzSAoXcReh6PND_9mn7lDZ7OJ4",
+    authDomain: "varimitra-1.firebaseapp.com",
+    projectId: "varimitra-1",
+    storageBucket: "varimitra-1.firebasestorage.app",
+    messagingSenderId: "367005747378",
+    appId: "1:367005747378:web:f72580afd3765c44b421ab"
 };
 
-// Initialize Firebase App
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
 // Initialize Cloud Firestore and get a reference to the service

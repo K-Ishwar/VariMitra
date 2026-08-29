@@ -19,7 +19,40 @@ export const dict = {
         title_authority: 'Authority Dashboard',
         title_dindi: 'Dindi Leader Dashboard',
         title_ngo: 'NGO Dashboard',
-        title_public: 'Civilian Dashboard'
+        title_public: 'Civilian Dashboard',
+        
+        // Auth / Login
+        auth_subtitle: 'Pilgrimage Management System',
+        auth_username: 'Username',
+        auth_pass: 'Password',
+        auth_login_btn: 'Login',
+        auth_reg_link: 'New User? Register Here',
+        
+        // Registration
+        reg_title: 'VariMitra Registration',
+        reg_tab_dindi: 'Dindi Leader',
+        reg_tab_ngo: 'NGO / Medical',
+        reg_tab_public: 'Public / Civilian',
+        reg_fullname: 'Full Name',
+        reg_phone: 'WhatsApp Number',
+        reg_pass: 'Password',
+        reg_dindi_name: 'Dindi / Group Name',
+        reg_village: 'Village of Origin',
+        reg_pilgrims: 'Number of Pilgrims',
+        reg_photo: 'Leader Photo',
+        reg_btn_dindi: 'Register as Dindi Leader',
+        reg_ngo_name: 'NGO Name',
+        reg_ngo_regno: 'Registration Number',
+        reg_location: 'Location / Area',
+        reg_service_type: 'Service Type',
+        reg_service_select: 'Select Service...',
+        reg_service_food: 'Food / Anna Setu',
+        reg_service_medical: 'Medical / Health',
+        reg_service_shelter: 'Shelter',
+        reg_btn_ngo: 'Register as NGO',
+        reg_address: 'City / Address',
+        reg_btn_public: 'Register as Civilian',
+        reg_login_link: 'Already have an account? Login here'
     },
     mr: {
         nav_alerts: 'आपत्कालीन सूचना',
@@ -41,6 +74,39 @@ export const dict = {
         title_authority: 'अधिकारी डॅशबोर्ड',
         title_dindi: 'दिंडी प्रमुख डॅशबोर्ड',
         title_ngo: 'स्वयंसेवी संस्था डॅशबोर्ड',
-        title_public: 'नागरिक डॅशबोर्ड'
+        title_public: 'नागरिक डॅशबोर्ड',
+
+        // Auth / Login
+        auth_subtitle: 'वारी व्यवस्थापन प्रणाली',
+        auth_username: 'वापरकर्तानाव',
+        auth_pass: 'संकेतशब्द',
+        auth_login_btn: 'लॉगिन',
+        auth_reg_link: 'नवीन वापरकर्ता? येथे नोंदणी करा',
+
+        // Registration
+        reg_title: 'वारीमित्र नोंदणी',
+        reg_tab_dindi: 'दिंडी प्रमुख',
+        reg_tab_ngo: 'स्वयंसेवी संस्था / वैद्यकीय',
+        reg_tab_public: 'नागरिक',
+        reg_fullname: 'संपूर्ण नाव',
+        reg_phone: 'व्हॉट्सॲप क्रमांक',
+        reg_pass: 'संकेतशब्द',
+        reg_dindi_name: 'दिंडी / गटाचे नाव',
+        reg_village: 'मूळ गाव',
+        reg_pilgrims: 'वारकऱ्यांची संख्या',
+        reg_photo: 'प्रमुखाचा फोटो',
+        reg_btn_dindi: 'दिंडी प्रमुख म्हणून नोंदणी करा',
+        reg_ngo_name: 'स्वयंसेवी संस्थेचे नाव',
+        reg_ngo_regno: 'नोंदणी क्रमांक',
+        reg_location: 'स्थान / परिसर',
+        reg_service_type: 'सेवेचा प्रकार',
+        reg_service_select: 'सेवा निवडा...',
+        reg_service_food: 'अन्न सेतू',
+        reg_service_medical: 'वैद्यकीय / आरोग्य',
+        reg_service_shelter: 'निवारा',
+        reg_btn_ngo: 'संस्था म्हणून नोंदणी करा',
+        reg_address: 'शहर / पत्ता',
+        reg_btn_public: 'नागरिक म्हणून नोंदणी करा',
+        reg_login_link: 'आधीपासून खाते आहे? येथे लॉगिन करा'
     }
 };

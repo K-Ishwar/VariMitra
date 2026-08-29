@@ -14,6 +14,12 @@
             justify-content: center;
             padding: 24px;
             box-sizing: border-box;
+            position: relative; /* Added for lang-container */
+        }
+        .lang-container {
+            position: absolute;
+            top: 24px;
+            right: 24px;
         }
         .register-card {
             width: 100%;
@@ -81,47 +87,54 @@
     </style>
 </head>
 <body>
+    <div class="lang-container">
+        <div class="langtoggle">
+            <button id="btnEN" class="active">EN</button>
+            <button id="btnMR">MR</button>
+        </div>
+    </div>
+
     <div class="card register-card">
-        <div class="wordmark" style="font-size: 28px; margin-bottom: 24px;">Vari<span>Mitra</span> Registration</div>
+        <div class="wordmark" style="font-size: 28px; margin-bottom: 24px;"><span data-i18n="reg_title">VariMitra Registration</span></div>
         
         <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab(event, 'dindi')">Dindi Leader</button>
-            <button class="tab-btn" onclick="switchTab(event, 'ngo')">NGO / Medical</button>
-            <button class="tab-btn" onclick="switchTab(event, 'public')">Public / Civilian</button>
+            <button class="tab-btn active" onclick="switchTab(event, 'dindi')" data-i18n="reg_tab_dindi">Dindi Leader</button>
+            <button class="tab-btn" onclick="switchTab(event, 'ngo')" data-i18n="reg_tab_ngo">NGO / Medical</button>
+            <button class="tab-btn" onclick="switchTab(event, 'public')" data-i18n="reg_tab_public">Public / Civilian</button>
         </div>
 
         <!-- Dindi Leader Form -->
         <div id="tab-dindi" class="tab-content active">
             <form onsubmit="window.handleRegister(event, 'dindi_leader')">
                 <div class="form-group">
-                    <label for="regName_dindi_leader">Full Name</label>
+                    <label for="regName_dindi_leader" data-i18n="reg_fullname">Full Name</label>
                     <input type="text" id="regName_dindi_leader" class="input-field" required>
                 </div>
                 <div class="form-group">
-                    <label for="regPhone_dindi_leader">WhatsApp Number</label>
+                    <label for="regPhone_dindi_leader" data-i18n="reg_phone">WhatsApp Number</label>
                     <input type="tel" id="regPhone_dindi_leader" class="input-field" required>
                 </div>
                 <div class="form-group">
-                    <label for="regPass_dindi_leader">Password</label>
+                    <label for="regPass_dindi_leader" data-i18n="reg_pass">Password</label>
                     <input type="password" id="regPass_dindi_leader" class="input-field" required>
                 </div>
                 <div class="form-group">
-                    <label for="dindiName">Dindi / Group Name</label>
+                    <label for="dindiName" data-i18n="reg_dindi_name">Dindi / Group Name</label>
                     <input type="text" id="dindiName" class="input-field" required>
                 </div>
                 <div class="form-group">
-                    <label for="villageName">Village of Origin</label>
+                    <label for="villageName" data-i18n="reg_village">Village of Origin</label>
                     <input type="text" id="villageName" class="input-field" required>
                 </div>
                 <div class="form-group">
-                    <label for="pilgrimCount">Number of Pilgrims</label>
+                    <label for="pilgrimCount" data-i18n="reg_pilgrims">Number of Pilgrims</label>
                     <input type="number" id="pilgrimCount" class="input-field" required>
                 </div>
                 <div class="form-group">
-                    <label for="leaderPhoto">Leader Photo</label>
+                    <label for="leaderPhoto" data-i18n="reg_photo">Leader Photo</label>
                     <input type="file" id="leaderPhoto" class="input-field" accept="image/*" style="padding: 8px;" required>
                 </div>
-                <button type="submit" class="btn-primary submit-btn">Register as Dindi Leader</button>
+                <button type="submit" class="btn-primary submit-btn" data-i18n="reg_btn_dindi">Register as Dindi Leader</button>
             </form>
         </div>
 
@@ -129,39 +142,39 @@
         <div id="tab-ngo" class="tab-content">
             <form onsubmit="window.handleRegister(event, 'ngo')">
                 <div class="form-group">
-                    <label for="regName_ngo">Full Name</label>
+                    <label for="regName_ngo" data-i18n="reg_fullname">Full Name</label>
                     <input type="text" id="regName_ngo" class="input-field" required>
                 </div>
                 <div class="form-group">
-                    <label for="regPhone_ngo">WhatsApp Number</label>
+                    <label for="regPhone_ngo" data-i18n="reg_phone">WhatsApp Number</label>
                     <input type="tel" id="regPhone_ngo" class="input-field" required>
                 </div>
                 <div class="form-group">
-                    <label for="regPass_ngo">Password</label>
+                    <label for="regPass_ngo" data-i18n="reg_pass">Password</label>
                     <input type="password" id="regPass_ngo" class="input-field" required>
                 </div>
                 <div class="form-group">
-                    <label for="ngoName">NGO Name</label>
+                    <label for="ngoName" data-i18n="reg_ngo_name">NGO Name</label>
                     <input type="text" id="ngoName" class="input-field" required>
                 </div>
                 <div class="form-group">
-                    <label for="ngoRegNo">Registration Number</label>
+                    <label for="ngoRegNo" data-i18n="reg_ngo_regno">Registration Number</label>
                     <input type="text" id="ngoRegNo" class="input-field" required>
                 </div>
                 <div class="form-group">
-                    <label for="location">Location / Area</label>
+                    <label for="location" data-i18n="reg_location">Location / Area</label>
                     <input type="text" id="location" class="input-field" required>
                 </div>
                 <div class="form-group">
-                    <label for="ngoType">Service Type</label>
+                    <label for="ngoType" data-i18n="reg_service_type">Service Type</label>
                     <select id="ngoType" class="input-field" required>
-                        <option value="" disabled selected>Select Service...</option>
-                        <option value="Food">Food / Anna Setu</option>
-                        <option value="Medical">Medical / Health</option>
-                        <option value="Shelter">Shelter</option>
+                        <option value="" disabled selected data-i18n="reg_service_select">Select Service...</option>
+                        <option value="Food" data-i18n="reg_service_food">Food / Anna Setu</option>
+                        <option value="Medical" data-i18n="reg_service_medical">Medical / Health</option>
+                        <option value="Shelter" data-i18n="reg_service_shelter">Shelter</option>
                     </select>
                 </div>
-                <button type="submit" class="btn-primary submit-btn">Register as NGO</button>
+                <button type="submit" class="btn-primary submit-btn" data-i18n="reg_btn_ngo">Register as NGO</button>
             </form>
         </div>
 
@@ -169,26 +182,26 @@
         <div id="tab-public" class="tab-content">
             <form onsubmit="window.handleRegister(event, 'public')">
                 <div class="form-group">
-                    <label for="regName_public">Full Name</label>
+                    <label for="regName_public" data-i18n="reg_fullname">Full Name</label>
                     <input type="text" id="regName_public" class="input-field" required>
                 </div>
                 <div class="form-group">
-                    <label for="regPhone_public">WhatsApp Number</label>
+                    <label for="regPhone_public" data-i18n="reg_phone">WhatsApp Number</label>
                     <input type="tel" id="regPhone_public" class="input-field" required>
                 </div>
                 <div class="form-group">
-                    <label for="regPass_public">Password</label>
+                    <label for="regPass_public" data-i18n="reg_pass">Password</label>
                     <input type="password" id="regPass_public" class="input-field" required>
                 </div>
                 <div class="form-group">
-                    <label for="address_public">City / Address</label>
+                    <label for="address_public" data-i18n="reg_address">City / Address</label>
                     <input type="text" id="address_public" class="input-field" required>
                 </div>
-                <button type="submit" class="btn-primary submit-btn">Register as Civilian</button>
+                <button type="submit" class="btn-primary submit-btn" data-i18n="reg_btn_public">Register as Civilian</button>
             </form>
         </div>
 
-        <a href="index.html" class="login-link">Already have an account? Login here</a>
+        <a href="index.html" class="login-link" data-i18n="reg_login_link">Already have an account? Login here</a>
     </div>
 
     <script>

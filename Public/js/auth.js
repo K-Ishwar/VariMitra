@@ -1,9 +1,29 @@
 import { db } from './config.js';
 import { collection, query, where, getDocs, addDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
+// --- Loading Overlay Helpers ---
+function showLoading() {
+    let overlay = document.getElementById('global-loading');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'global-loading';
+        overlay.className = 'loading-overlay';
+        overlay.innerHTML = '<span class="spinner"></span>';
+        document.body.appendChild(overlay);
+    }
+    void overlay.offsetWidth;
+    overlay.classList.add('active');
+}
+
+function hideLoading() {
+    const overlay = document.getElementById('global-loading');
+    if (overlay) overlay.classList.remove('active');
+}
+
 // --- Login Logic ---
 window.handleLogin = async function(event) {
     event.preventDefault();
+    showLoading();
     
     const usernameInput = document.getElementById('username').value;
     const passwordInput = document.getElementById('loginPass').value;
@@ -13,6 +33,7 @@ window.handleLogin = async function(event) {
         localStorage.setItem('userRole', 'super_admin');
         localStorage.setItem('userName', 'Super Admin');
         window.location.href = 'dashboard.html';
+        hideLoading();
         return;
     }
     
@@ -38,8 +59,8 @@ window.handleLogin = async function(event) {
             localStorage.setItem('userId', userDoc.id);
             localStorage.setItem('userRole', userData.role);
             localStorage.setItem('userName', userData.name || userData.username);
-            if (userData.username) {
-                localStorage.setItem('userPhone', userData.username); // username is stored as phone
+            if (userData.phone) {
+                localStorage.setItem('userPhone', userData.phone);
             }
             
             // Redirect to SPA dashboard
@@ -58,6 +79,8 @@ window.handleLogin = async function(event) {
         } else {
             alert('An error occurred during login.');
         }
+    } finally {
+        hideLoading();
     }
 };
 
@@ -74,6 +97,7 @@ const fileToBase64 = (file) => {
 // --- Registration Logic ---
 window.handleRegister = async function(event, role) {
     event.preventDefault();
+    showLoading();
     
     try {
         let name, phone, password, status = 'approved', extraData = {};
@@ -125,7 +149,8 @@ window.handleRegister = async function(event, role) {
         // Prepare user document payload
         const newUser = {
             name: name,
-            username: phone, // using phone as the username field in DB for logins
+            username: name, // using Full Name as the username field in DB for logins
+            phone: phone,
             password: password,
             role: role,
             status: status,
@@ -157,5 +182,7 @@ window.handleRegister = async function(event, role) {
         } else {
             alert('An error occurred during registration. Ensure Firebase Config is correct.');
         }
+    } finally {
+        hideLoading();
     }
 };

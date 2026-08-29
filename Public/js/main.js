@@ -105,6 +105,10 @@ function setupGatekeeper() {
         case 'dindi_leader':
         case 'dindi_helper':
             showElements('panel-dindi', ['nav-lostfound']);
+            if (window.initDindiMap) {
+                // slight delay to ensure div is rendered with dimensions before Leaflet initializes
+                setTimeout(() => window.initDindiMap(), 50);
+            }
             break;
         case 'ngo':
             showElements('panel-ngo', ['nav-seva', 'nav-map']);
