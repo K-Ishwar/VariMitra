@@ -1,5 +1,7 @@
 import { dict } from './dict.js';
 import { initSuperAdmin } from './modules/superadmin.js';
+import { db } from './config.js';
+import { doc, getDoc, collection, query, where, getDocs, onSnapshot, orderBy, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     // 1. Language Initialization
@@ -117,6 +119,9 @@ function setupGatekeeper() {
             break;
         case 'authority':
             showElements('panel-authority', ['nav-alerts', 'nav-map']);
+            if (window.initAuthorityDashboard) {
+                window.initAuthorityDashboard();
+            }
             break;
         case 'dindi_leader':
         case 'dindi_helper':

@@ -1,5 +1,5 @@
 import { db, ORS_API_KEY } from './config.js';
-import { doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import { doc, getDoc, setDoc, collection, addDoc, getDocs, query, where, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 const PANDHARPUR = { lat: 17.6799, lng: 75.3266 };
 let map = null;
@@ -28,6 +28,241 @@ window.initDindiMap = function() {
         .bindTooltip("Pandharpur", { permanent: true, direction: 'right' });
 };
 
+window.switchDindiTab = function(tabId) {
+    const routeTab = document.getElementById('dindi-content-route');
+    const registryTab = document.getElementById('dindi-content-registry');
+    const routeBtn = document.getElementById('tab-dindi-route');
+    const registryBtn = document.getElementById('tab-dindi-registry');
+
+    if (tabId === 'route') {
+        routeTab.style.display = 'block';
+        registryTab.style.display = 'none';
+        routeBtn.style.backgroundColor = 'var(--night)';
+        routeBtn.style.color = 'white';
+        registryBtn.style.backgroundColor = 'var(--paper-2)';
+        registryBtn.style.color = 'var(--ink)';
+    } else {
+        routeTab.style.display = 'none';
+        registryTab.style.display = 'block';
+        registryBtn.style.backgroundColor = 'var(--night)';
+        registryBtn.style.color = 'white';
+        routeBtn.style.backgroundColor = 'var(--paper-2)';
+        routeBtn.style.color = 'var(--ink)';
+    }
+};
+
+window.toggleMedicalOther = function(val) {
+    const otherInput = document.getElementById('pilgrimMedicalOther');
+    if (val === 'Other') {
+        otherInput.style.display = 'block';
+        otherInput.required = true;
+    } else {
+        otherInput.style.display = 'none';
+        otherInput.required = false;
+        otherInput.value = '';
+    }
+};
+
+window.previewPilgrimPhoto = function(event) {
+    const file = event.target.files[0];
+    const previewContainer = document.getElementById('photoPreviewContainer');
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            previewContainer.innerHTML = `<img src="${e.target.result}" style="width: 100%; height: 100%; object-fit: cover;">`;
+        };
+        reader.readAsDataURL(file);
+    } else {
+        previewContainer.innerHTML = `<span style="font-size: 32px; color: var(--sage);">📷</span>`;
+    }
+};
+
+window.submitPilgrimRegistry = async function(event) {
+    event.preventDefault();
+    const btn = event.target.querySelector('button[type="submit"]');
+    btn.innerText = "Step 1: Starting...";
+    btn.disabled = true;
+
+    try {
+        const userId = localStorage.getItem('userId');
+        if (!userId) throw new Error("No user ID found");
+
+        let photoUrl = null;
+        const photoFile = document.getElementById('pilgrimPhoto').files[0];
+        if (photoFile) {
+            btn.innerText = "Step 2: Processing Photo...";
+            // Compress and convert image to Base64 using a Canvas
+            photoUrl = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        const MAX_WIDTH = 300;
+                        const MAX_HEIGHT = 300;
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > height) {
+                            if (width > MAX_WIDTH) {
+                                height *= MAX_WIDTH / width;
+                                width = MAX_WIDTH;
+                            }
+                        } else {
+                            if (height > MAX_HEIGHT) {
+                                width *= MAX_HEIGHT / height;
+                                height = MAX_HEIGHT;
+                            }
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        // Output as compressed JPEG Base64
+                        resolve(canvas.toDataURL('image/jpeg', 0.7));
+                    };
+                    img.onerror = reject;
+                    img.src = e.target.result;
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(photoFile);
+            });
+        }
+
+        btn.innerText = "Step 4: Saving to Database...";
+        const medicalSelect = document.getElementById('pilgrimMedicalSelect').value;
+        const medicalInfo = medicalSelect === 'Other' ? document.getElementById('pilgrimMedicalOther').value : medicalSelect;
+
+        const payload = {
+            leaderId: userId,
+            fullName: document.getElementById('pilgrimFullName').value,
+            age: parseInt(document.getElementById('pilgrimAge').value, 10),
+            bloodGroup: document.getElementById('pilgrimBloodGroup').value,
+            medicalInfo: medicalInfo,
+            emergencyContact: document.getElementById('pilgrimEmergencyContact').value,
+            emergencyPhone: document.getElementById('pilgrimEmergencyPhone').value,
+            photoUrl: photoUrl,
+            createdAt: new Date().toISOString()
+        };
+
+        await addDoc(collection(db, 'pilgrims'), payload);
+        
+        btn.innerText = "Step 5: Updating UI...";
+        document.getElementById('pilgrimRegistryForm').reset();
+        document.getElementById('photoPreviewContainer').innerHTML = `<span style="font-size: 32px; color: var(--sage);">📷</span>`;
+        document.getElementById('pilgrimMedicalOther').style.display = 'none';
+        
+        document.getElementById('addPilgrimSection').style.display = 'none';
+        document.getElementById('registeredPilgrimsSection').style.display = 'block';
+        
+        btn.innerText = "Step 6: Refreshing List...";
+        await window.fetchAndRenderPilgrims(); // Refresh the list
+        
+        btn.innerText = "Done!";
+    } catch (error) {
+        console.error("Error registering pilgrim:", error);
+        alert("Failed to register pilgrim: " + error.message);
+    } finally {
+        setTimeout(() => {
+            btn.innerText = "Register Pilgrim";
+            btn.disabled = false;
+        }, 2000);
+    }
+};
+
+window.fetchAndRenderPilgrims = async function() {
+    const container = document.getElementById('registeredPilgrimsList');
+    if (!container) return;
+
+    try {
+        const userId = localStorage.getItem('userId');
+        if (!userId) return;
+
+        const q = query(collection(db, 'pilgrims'), where("leaderId", "==", userId));
+        const querySnapshot = await getDocs(q);
+        
+        let html = '';
+        let totalCount = 0;
+
+        querySnapshot.forEach((docSnap) => {
+            totalCount++;
+            const p = docSnap.data();
+            const dateStr = new Date(p.createdAt).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' });
+            const hasMedicalIssue = p.medicalInfo && p.medicalInfo !== 'All Good';
+            const medicalTag = hasMedicalIssue ? `<div style="font-size: 12px; color: var(--vermilion); margin-top: 4px; font-weight: 500;">⚠️ Medical: ${p.medicalInfo}</div>` : `<div style="font-size: 12px; color: var(--success); margin-top: 4px;">✅ Medically Fit</div>`;
+            const photoEl = p.photoUrl ? `<img src="${p.photoUrl}" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; margin-right: 16px; border: 2px solid var(--line);">` : `<div style="width: 50px; height: 50px; border-radius: 50%; background: var(--paper); display: flex; align-items: center; justify-content: center; margin-right: 16px; border: 2px solid var(--line); font-size: 20px;">👤</div>`;
+
+            html += `
+                <div class="card" style="margin-bottom: 12px; padding: 16px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid var(--marigold);">
+                    <div style="display: flex; align-items: center;">
+                        ${photoEl}
+                        <div>
+                            <div style="font-weight: 600; font-size: 16px;">${p.fullName} <span style="font-size: 12px; color: var(--sage); font-weight: normal;">(${p.age} yrs, ${p.bloodGroup})</span></div>
+                            <div style="font-size: 13px; color: var(--ink); margin-top: 4px;">📞 Contact: ${p.emergencyContact} (${p.emergencyPhone})</div>
+                            ${medicalTag}
+                            <div style="font-size: 11px; color: var(--sage); margin-top: 8px;">Registered: ${dateStr}</div>
+                        </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button onclick="window.generatePilgrimID('${docSnap.id}', '${p.fullName.replace(/'/g, "\\'")}', '${p.photoUrl || ''}')" style="background: var(--night); color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 12px; cursor: pointer;">Generate ID</button>
+                        <button onclick="window.deletePilgrim('${docSnap.id}')" style="background: none; border: none; color: var(--vermilion); cursor: pointer; font-size: 18px; padding: 8px; border-radius: 4px;" title="Remove Pilgrim" onmouseover="this.style.background='var(--paper)'" onmouseout="this.style.background='none'">🗑️</button>
+                    </div>
+                </div>
+            `;
+        });
+
+        if (totalCount === 0) {
+            container.innerHTML = '<p style="color: var(--sage); font-style: italic;">No pilgrims registered yet.</p>';
+        } else {
+            container.innerHTML = html;
+        }
+        
+        // Update total counter if we have one
+        const statPilgrims = document.getElementById('stat-pilgrims');
+        if (statPilgrims) statPilgrims.innerText = totalCount;
+
+    } catch (error) {
+        console.error("Error fetching pilgrims:", error);
+        container.innerHTML = '<p style="color: var(--vermilion);">Failed to load registry.</p>';
+    }
+};
+
+window.generatePilgrimID = function(pilgrimId, pilgrimName, photoUrl) {
+    const modal = document.getElementById('pilgrim-id-modal');
+    const nameEl = document.getElementById('pilgrim-id-name');
+    const photoContainer = document.getElementById('pilgrim-id-photo-container');
+    const qrContainer = document.getElementById('pilgrim-id-qr-container');
+
+    // Populate data
+    nameEl.innerText = pilgrimName;
+
+    if (photoUrl) {
+        photoContainer.innerHTML = `<img src="${photoUrl}" style="width: 100%; height: 100%; object-fit: cover;">`;
+    } else {
+        photoContainer.innerHTML = `<div style="width: 100%; height: 100%; background: var(--paper); display: flex; align-items: center; justify-content: center; font-size: 48px;">👤</div>`;
+    }
+
+    // Generate QR Code URL
+    const publicUrl = window.location.origin + '/pilgrim.html?id=' + pilgrimId;
+    const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(publicUrl)}`;
+    qrContainer.innerHTML = `<img src="${qrApiUrl}" alt="QR Code" style="width: 120px; height: 120px;">`;
+
+    // Show modal
+    modal.style.display = 'flex';
+};
+
+window.deletePilgrim = async function(docId) {
+    if (!confirm("Are you sure you want to remove this pilgrim?")) return;
+    try {
+        await deleteDoc(doc(db, 'pilgrims', docId));
+        await window.fetchAndRenderPilgrims();
+    } catch (error) {
+        console.error("Error deleting pilgrim:", error);
+        alert("Failed to delete pilgrim.");
+    }
+};
+
 window.initDindiLeader = async function() {
     window.initDindiMap();
     
@@ -39,6 +274,9 @@ window.initDindiLeader = async function() {
         if (docSnap.exists()) {
             window.loadSavedRoute(docSnap.data());
         }
+        
+        // Also fetch their pilgrims
+        window.fetchAndRenderPilgrims();
     } catch (e) {
         console.error("Error loading saved route:", e);
     }

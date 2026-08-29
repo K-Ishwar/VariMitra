@@ -89,15 +89,76 @@
         </form>
         
         <a href="register.html" class="register-link" data-i18n="auth_reg_link">New User? Register Here</a>
+        
+        <div style="margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--line);">
+            <p style="font-size: 13px; color: var(--sage); margin-bottom: 12px;">Public Safety Tools (No Login Required)</p>
+            <div style="display: flex; gap: 8px;">
+                <button onclick="startScanner()" style="flex: 1; background: var(--night); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer;">📷 Scan Safety QR</button>
+                <button onclick="exitApp()" style="background: var(--paper-2); border: 1px solid var(--line); color: var(--vermilion); padding: 12px 16px; border-radius: 8px; font-weight: 600; cursor: pointer;">Exit</button>
+            </div>
+        </div>
     </div>
 
+    <!-- QR Scanner Modal -->
+    <div id="qr-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); z-index: 9999; align-items: center; justify-content: center; flex-direction: column;">
+        <div style="background: white; padding: 16px; border-radius: 12px; width: 90%; max-width: 400px; text-align: center;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 style="margin: 0; font-family: var(--font-heading);">Scan QR Code</h3>
+                <button onclick="stopScanner()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--vermilion);">&times;</button>
+            </div>
+            <div id="reader" style="width: 100%;"></div>
+            <p style="font-size: 12px; color: var(--sage); margin-top: 16px;">Point your camera at the Pilgrim's ID Card</p>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/html5-qrcode"></script>
     <script>
-        // Dummy handleLogin to prevent form from submitting natively
-        window.handleLogin = function(event) {
-            event.preventDefault();
-            console.log("Login attempted");
+        let html5QrcodeScanner = null;
+
+        function startScanner() {
+            document.getElementById('qr-modal').style.display = 'flex';
+            html5QrcodeScanner = new Html5QrcodeScanner(
+                "reader",
+                { fps: 10, qrbox: {width: 250, height: 250} },
+                /* verbose= */ false);
+            html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+        }
+
+        function stopScanner() {
+            if (html5QrcodeScanner) {
+                html5QrcodeScanner.clear();
+            }
+            document.getElementById('qr-modal').style.display = 'none';
+        }
+
+        function onScanSuccess(decodedText, decodedResult) {
+            stopScanner();
+            if (decodedText.includes('pilgrim.html')) {
+                window.location.href = decodedText;
+            } else {
+                alert("Invalid QR Code: " + decodedText);
+            }
+        }
+
+        function onScanFailure(error) {
+            // handle scan failure, usually better to ignore and keep scanning.
+        }
+
+        function exitApp() {
+            if (confirm("Are you sure you want to exit?")) {
+                // Try standard close
+                window.close();
+                // Fallback if browser blocks window.close() for script-unopened windows
+                document.body.innerHTML = `
+                    <div style="height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white;">
+                        <h2 style="margin-bottom: 16px;">VariMitra is closed.</h2>
+                        <p style="color: var(--sage);">You may now close this browser tab.</p>
+                    </div>
+                `;
+            }
         }
     </script>
+    
     <script type="module" src="js/config.js"></script>
     <script type="module" src="js/main.js"></script>
     <script type="module" src="js/auth.js"></script>

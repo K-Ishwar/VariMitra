@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Lost Pilgrim | VariMitra</title>
+    <link rel="stylesheet" href="CSS/style.css">
+    <style>
+        body {
+            background-color: var(--paper);
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .report-card {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            box-sizing: border-box;
+            margin: 16px;
+        }
+        
+        .langtoggle {
+            display: flex;
+            background: var(--paper-2);
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid var(--line);
+        }
+
+        .langtoggle button {
+            background: none;
+            border: none;
+            padding: 4px 10px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--ink);
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .langtoggle button.active {
+            background: var(--night);
+            color: white;
+        }
+
+        .location-btn {
+            background: var(--paper-2);
+            border: 1px solid var(--line);
+            padding: 12px;
+            border-radius: 8px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--ink);
+            transition: 0.2s;
+        }
+        .location-btn:hover {
+            background: var(--paper);
+        }
+        .location-btn.success {
+            background: #e8f5e9;
+            border-color: var(--success);
+            color: var(--success);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="report-card">
+        <!-- Header Inside Card -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--line);">
+            <div class="wordmark" style="font-size: 20px;">Vari<span>Mitra</span></div>
+            <div class="langtoggle">
+                <button id="btnEN" class="active">EN</button>
+                <button id="btnMR">MR</button>
+            </div>
+        </div>
+
+        <div style="font-size: 40px; margin-bottom: 12px;">⚠️</div>
+        <h2 style="color: var(--vermilion); margin-top: 0; margin-bottom: 8px; font-family: var(--font-heading);" data-i18n="emergency_alert">Emergency Alert</h2>
+        <p style="color: var(--ink); font-size: 14px; margin-bottom: 24px; line-height: 1.5;" data-i18n="qr_scanned_msg">
+            Lost pilgrim found? Please enter your mobile number and share your location to notify authorities instantly.
+        </p>
+
+        <form id="reportForm">
+            <div style="text-align: left; margin-bottom: 20px;">
+                <label style="display:block; margin-bottom: 8px; font-weight: 500; font-size: 14px; color: var(--night);" data-i18n="your_mobile">Your Mobile Number</label>
+                <input type="tel" id="rescuerPhone" class="input-field" required pattern="[0-9]{10}" placeholder="e.g., 9876543210" style="width: 100%; box-sizing: border-box;">
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <button type="button" id="getLocationBtn" class="location-btn">
+                    <span>📍</span> <span id="locationText" data-i18n="get_gps">Get Current GPS Location</span>
+                </button>
+                <div id="latLngDisplay" style="display: none; font-size: 12px; color: var(--sage); margin-top: 8px; background: var(--paper-2); padding: 8px; border-radius: 4px; font-family: monospace;"></div>
+            </div>
+
+            <button type="submit" class="btn-primary" style="width: 100%; background: var(--vermilion); padding: 14px; font-size: 16px; opacity: 0.5; cursor: not-allowed;" id="reportBtn" disabled data-i18n="report_lost">Report Lost Pilgrim</button>
+        </form>
+
+        <div id="successView" style="display: none; margin-top: 16px;">
+            <div style="background: #e8f5e9; border: 1px solid var(--success); padding: 16px; border-radius: 8px; margin-bottom: 16px;">
+                <p style="margin: 0; color: var(--success); font-weight: 600; font-size: 15px;">Alert sent successfully!</p>
+                <p style="margin: 6px 0 0 0; color: var(--night); font-size: 13px;">Authorities have been notified with your exact location.</p>
+            </div>
+            
+            <p style="font-size: 13px; color: var(--sage); margin-bottom: 12px;">You can also quickly notify the contacts via WhatsApp:</p>
+            
+            <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px;">
+                <a id="waEmergencyBtn" href="#" target="_blank" style="display: none; text-decoration: none; background: #25D366; color: white; padding: 10px; border-radius: 8px; font-weight: 600; font-size: 14px; align-items: center; justify-content: center; gap: 8px;">
+                    💬 Notify Emergency Contact
+                </a>
+                <a id="waLeaderBtn" href="#" target="_blank" style="display: none; text-decoration: none; background: #128C7E; color: white; padding: 10px; border-radius: 8px; font-weight: 600; font-size: 14px; align-items: center; justify-content: center; gap: 8px;">
+                    💬 Notify Dindi Leader
+                </a>
+            </div>
+            
+            <button onclick="window.location.href='index.html'" style="background: var(--paper-2); border: 1px solid var(--line); color: var(--ink); padding: 12px; border-radius: 8px; width: 100%; font-weight: 600; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='var(--paper)'" onmouseout="this.style.background='var(--paper-2)'" data-i18n="exit_btn">
+                Scan New QR / Exit
+            </button>
+        </div>
+
+        <div id="statusMsg" style="margin-top: 24px; font-size: 14px; display: none; font-weight: 500;"></div>
+    </div>
+
+    <script type="module">
+        import { db } from './js/config.js';
+        import { doc, getDoc, collection, addDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const pilgrimId = urlParams.get('id');
+        let capturedLocation = null;
+        let pilgrimData = null;
+        let leaderPhone = null;
+
+        if (!pilgrimId) {
+            document.querySelector('.report-card').innerHTML = '<h3 style="color: var(--vermilion);">Invalid QR Code</h3><p>No Pilgrim ID found in the link.</p>';
+        } else {
+            // Pre-fetch pilgrim data to get emergency contact
+            getDoc(doc(db, 'pilgrims', pilgrimId)).then(snap => {
+                if(snap.exists()) {
+                    pilgrimData = snap.data();
+                    if(pilgrimData.leaderId) {
+                        getDoc(doc(db, 'users', pilgrimData.leaderId)).then(leaderSnap => {
+                            if(leaderSnap.exists()) {
+                                leaderPhone = leaderSnap.data().phone;
+                            }
+                        });
+                    }
+                }
+            }).catch(e => console.error("Could not fetch pilgrim info:", e));
+
+            const form = document.getElementById('reportForm');
+            const reportBtn = document.getElementById('reportBtn');
+            const getLocationBtn = document.getElementById('getLocationBtn');
+            const locationText = document.getElementById('locationText');
+            const latLngDisplay = document.getElementById('latLngDisplay');
+            const statusMsg = document.getElementById('statusMsg');
+            const successView = document.getElementById('successView');
+            const waEmergencyBtn = document.getElementById('waEmergencyBtn');
+
+            getLocationBtn.addEventListener('click', () => {
+                if (!navigator.geolocation) {
+                    showStatus("Geolocation is not supported by your browser.", false);
+                    return;
+                }
+                
+                locationText.innerText = "Fetching location...";
+                getLocationBtn.style.opacity = '0.7';
+
+                navigator.geolocation.getCurrentPosition((position) => {
+                    capturedLocation = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+                    
+                    getLocationBtn.classList.add('success');
+                    locationText.innerText = "Location Captured ✓";
+                    getLocationBtn.style.opacity = '1';
+                    
+                    latLngDisplay.style.display = 'block';
+                    latLngDisplay.innerText = `Fetching address...`;
+                    
+                    // Reverse Geocode
+                    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${capturedLocation.lat}&lon=${capturedLocation.lng}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            latLngDisplay.innerText = data.display_name || `Lat: ${capturedLocation.lat.toFixed(5)}, Lng: ${capturedLocation.lng.toFixed(5)}`;
+                        })
+                        .catch(err => {
+                            latLngDisplay.innerText = `Lat: ${capturedLocation.lat.toFixed(5)}, Lng: ${capturedLocation.lng.toFixed(5)}`;
+                        });
+                    
+                    // Enable submit button
+                    reportBtn.disabled = false;
+                    reportBtn.style.opacity = '1';
+                    reportBtn.style.cursor = 'pointer';
+                }, (error) => {
+                    console.error("Geolocation error:", error);
+                    showStatus("Please allow Location Access to send this emergency report.", false);
+                    locationText.innerText = "Get Current GPS Location";
+                    getLocationBtn.style.opacity = '1';
+                }, {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                });
+            });
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                if (!capturedLocation) return;
+                
+                reportBtn.disabled = true;
+                reportBtn.innerText = "Sending Alert...";
+
+                const rescuerPhone = document.getElementById('rescuerPhone').value;
+
+                try {
+                    await addDoc(collection(db, 'lostReports'), {
+                        pilgrimId: pilgrimId,
+                        pilgrimName: pilgrimData ? pilgrimData.fullName : 'Unknown',
+                        leaderId: pilgrimData ? pilgrimData.leaderId : null,
+                        rescuerPhone: rescuerPhone,
+                        location: capturedLocation,
+                        timestamp: new Date().toISOString(),
+                        status: 'active'
+                    });
+
+                    form.style.display = 'none';
+                    statusMsg.style.display = 'none';
+                    successView.style.display = 'block';
+
+                    const waMsg = `EMERGENCY: I found a lost pilgrim named ${pilgrimData ? pilgrimData.fullName : 'Unknown'}. I am at this location: https://maps.google.com/?q=${capturedLocation.lat},${capturedLocation.lng}. My number is ${rescuerPhone}.`;
+
+                    if (pilgrimData && pilgrimData.emergencyPhone) {
+                        waEmergencyBtn.href = `https://wa.me/91${pilgrimData.emergencyPhone}?text=${encodeURIComponent(waMsg)}`;
+                        waEmergencyBtn.style.display = 'flex';
+                    }
+                    
+                    if (leaderPhone) {
+                        const waLeaderBtn = document.getElementById('waLeaderBtn');
+                        waLeaderBtn.href = `https://wa.me/91${leaderPhone}?text=${encodeURIComponent(waMsg)}`;
+                        waLeaderBtn.style.display = 'flex';
+                    }
+                } catch (error) {
+                    console.error("Error reporting:", error);
+                    showStatus("Failed to send alert. Please try again.", false);
+                    reportBtn.disabled = false;
+                    reportBtn.innerText = "Try Again";
+                }
+            });
+
+            function showStatus(msg, isSuccess) {
+                statusMsg.style.display = 'block';
+                statusMsg.innerText = msg;
+                statusMsg.style.color = isSuccess ? 'var(--success)' : 'var(--vermilion)';
+            }
+            
+            // Bilingual Logic
+            const localDict = {
+                en: {
+                    emergency_alert: "Emergency Alert",
+                    qr_scanned_msg: "Lost pilgrim found? Please enter your mobile number and share your location to notify authorities instantly.",
+                    your_mobile: "Your Mobile Number",
+                    get_gps: "Get Current GPS Location",
+                    report_lost: "Report Lost Pilgrim",
+                    exit_btn: "Scan New QR / Exit"
+                },
+                mr: {
+                    emergency_alert: "आपत्कालीन सूचना",
+                    qr_scanned_msg: "हरवलेला वारकरी सापडला? कृपया तुमचा मोबाईल नंबर टाका आणि अधिकाऱ्यांना तात्काळ कळवण्यासाठी तुमचे लोकेशन शेअर करा.",
+                    your_mobile: "तुमचा मोबाईल नंबर",
+                    get_gps: "सध्याचे GPS लोकेशन मिळवा",
+                    report_lost: "हरवलेल्या वारकऱ्याची नोंद करा",
+                    exit_btn: "नवीन QR स्कॅन करा / बाहेर पडा"
+                }
+            };
+            
+            function applyLang(lang) {
+                document.getElementById('btnEN').classList.toggle('active', lang === 'en');
+                document.getElementById('btnMR').classList.toggle('active', lang === 'mr');
+                
+                document.querySelectorAll('[data-i18n]').forEach(el => {
+                    const key = el.getAttribute('data-i18n');
+                    if (localDict[lang] && localDict[lang][key]) {
+                        el.innerText = localDict[lang][key];
+                    }
+                });
+            }
+
+            document.getElementById('btnEN').addEventListener('click', () => applyLang('en'));
+            document.getElementById('btnMR').addEventListener('click', () => applyLang('mr'));
+        }
+    </script>
+</body>
+</html>
