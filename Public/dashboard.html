@@ -281,7 +281,7 @@
                                 <div id="savedRouteView" style="display: none; margin-bottom: 16px;"></div>
                                 
                                 <div id="dindiPlannerSetup">
-                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 24px;">
                                         <div style="position: relative; z-index: 1000;">
                                             <label for="startVillageInput" style="display:block; margin-bottom: 8px; font-weight: 500;">Start Location</label>
                                             <div style="position: relative;">
@@ -295,12 +295,11 @@
                                             <label for="startDate" style="display:block; margin-bottom: 8px; font-weight: 500;">Journey Start Date</label>
                                             <input type="date" id="startDate" class="input-field" required>
                                         </div>
-                                    </div>
 
-                                    <!-- Hidden end date for compatibility -->
-                                    <div style="display: none;">
-                                        <label for="endDate">End Date</label>
-                                        <input type="date" id="endDate" class="input-field" value="2026-07-23">
+                                        <div>
+                                            <label for="endDate" style="display:block; margin-bottom: 8px; font-weight: 500;">Journey End Date</label>
+                                            <input type="date" id="endDate" class="input-field" required>
+                                        </div>
                                     </div>
 
                                     <div style="text-align: center;">
