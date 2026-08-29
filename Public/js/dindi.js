@@ -1,5 +1,5 @@
 import { db, ORS_API_KEY } from './config.js';
-import { doc, getDoc, setDoc, collection, addDoc, getDocs, query, where, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import { doc, getDoc, setDoc, collection, addDoc, getDocs, query, where, deleteDoc, onSnapshot, orderBy, updateDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 const PANDHARPUR = { lat: 17.6799, lng: 75.3266 };
 let map = null;
@@ -1124,79 +1124,118 @@ window.setupCustomViaSearch = function(dayIndex) {
 };
 
 window.initLostPilgrimsFeed = function() {
-    const feedAuth = document.getElementById('lostPilgrimsFeed');
-    const badgeAuth = document.getElementById('lostCountBadge');
-    
-    const feedDindi = document.getElementById('lostPilgrimsFeedDindi');
-    const badgeDindi = document.getElementById('lostCountBadgeDindi');
+    const q = query(collection(db, 'lostReports'), orderBy('timestamp', 'desc'));
 
-    // We can just use the global db variable exported from config or imported in main.js
-    // but dindi.js doesn't seem to import it at the top, wait, it must, otherwise addDoc fails.
-    const { collection, query, orderBy, onSnapshot, doc, deleteDoc } = window.firebaseFirestore || {};
-    
-    // We will just use the global scope or imported functions if available.
-    // Assuming query, collection, orderBy, onSnapshot, etc. are available globally or we use the modular approach from main.js?
-    // Wait, let's use the exact same imports that were in dindi.js for db and collection.
-    // In dindi.js, we already have query, collection, db, etc.
-    const q = window.firestoreQuery || query(collection(db, 'lostReports'), orderBy('reportedAt', 'desc'));
-    
     onSnapshot(q, (snapshot) => {
-        let html = '';
-        let count = 0;
-        
+        let lostHtml = '';
+        let foundHtml = '';
+        let lostCount = 0;
+        let foundCount = 0;
+
         snapshot.forEach((docSnap) => {
             const data = docSnap.data();
+            const timeStr = new Date(data.timestamp).toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' });
+            const location = data.location || {};
+            const locName = data.locationName || (location.lat ? `${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}` : 'Unknown');
+            const mapsLink = location.lat ? `https://maps.google.com/?q=${location.lat},${location.lng}` : null;
+
             if (data.status === 'active') {
-                count++;
-                const timeStr = new Date(data.reportedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
-                
-                html += `
-                    <div style="background: var(--paper); border-left: 4px solid var(--vermilion); padding: 12px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-                            <strong style="color: var(--ink); font-size: 14px;">${data.pilgrimName}</strong>
-                            <span style="color: var(--sage); font-size: 11px;">${timeStr}</span>
+                lostCount++;
+                lostHtml += `
+                    <div style="background: #fff8f6; border-left: 4px solid var(--vermilion); padding: 14px 16px; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;">
+                        <div style="flex: 1;">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                                <span style="font-size: 18px;">🚨</span>
+                                <strong style="color: var(--ink); font-size: 15px;">${data.pilgrimName || 'Unknown'}</strong>
+                                <span style="font-size: 11px; color: var(--sage); margin-left: auto;">${timeStr}</span>
+                            </div>
+                            <div style="font-size: 12px; color: var(--ink); margin-bottom: 4px;">
+                                📍 ${mapsLink ? `<a href="${mapsLink}" target="_blank" style="color: var(--marigold-deep); text-decoration: underline;">${locName}</a>` : locName}
+                            </div>
+                            <div style="font-size: 12px; color: var(--sage);">
+                                📞 Rescuer: ${data.rescuerPhone || 'N/A'}
+                            </div>
                         </div>
-                        <div style="font-size: 12px; color: var(--ink); margin-bottom: 4px;">
-                            📍 <a href="${data.googleMapsLink}" target="_blank" style="color: var(--marigold-deep); text-decoration: underline;">${data.locationName || 'View Location'}</a>
+                        <button onclick="window.resolveLostReport('${docSnap.id}', '${(data.pilgrimName || '').replace(/'/g, "\\'")}')"
+                            style="background: #22c55e; color: white; border: none; padding: 8px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: background 0.2s;"
+                            onmouseover="this.style.background='#16a34a'" onmouseout="this.style.background='#22c55e'">
+                            ✅ Mark Found
+                        </button>
+                    </div>`;
+            } else if (data.status === 'found') {
+                foundCount++;
+                foundHtml += `
+                    <div style="background: #f0fdf4; border-left: 4px solid #22c55e; padding: 14px 16px; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.08);">
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                            <span style="font-size: 16px;">✅</span>
+                            <strong style="color: var(--ink); font-size: 14px;">${data.pilgrimName || 'Unknown'}</strong>
+                            <span style="font-size: 11px; color: #16a34a; margin-left: auto; font-weight: 600;">Reunited</span>
                         </div>
-                        <div style="font-size: 12px; color: var(--sage);">
-                            📞 Reported by: ${data.reporterPhone}
-                        </div>
-                        <div style="margin-top: 8px;">
-                            <button onclick="window.resolveLostReport('${docSnap.id}')" style="background: var(--success); color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer;">Mark as Found</button>
-                        </div>
-                    </div>
-                `;
+                        <div style="font-size: 12px; color: var(--sage);">${timeStr} · Rescuer: ${data.rescuerPhone || 'N/A'}</div>
+                    </div>`;
             }
         });
 
-        if (count === 0) {
-            html = '<div style="text-align: center; color: var(--ink); font-size: 13px; padding: 16px;">No alerts currently active.</div>';
-            if (badgeAuth) badgeAuth.style.display = 'none';
-            if (badgeDindi) badgeDindi.style.display = 'none';
-        } else {
-            if (badgeAuth) {
-                badgeAuth.style.display = 'inline-block';
-                badgeAuth.innerText = count;
+        // Update all feeds and badges
+        ['lostPilgrimsFeed', 'lostPilgrimsFeedDindi'].forEach(feedId => {
+            const feed = document.getElementById(feedId);
+            if (!feed) return;
+            feed.innerHTML = `
+                <!-- Stats Row -->
+                <div style="display: flex; gap: 12px; margin-bottom: 16px;">
+                    <div style="flex: 1; background: #fff1f0; border: 1px solid #fca5a5; border-radius: 10px; padding: 12px 16px; text-align: center;">
+                        <div style="font-size: 28px; font-weight: 700; color: var(--vermilion);">${lostCount}</div>
+                        <div style="font-size: 11px; color: var(--sage); font-weight: 600; margin-top: 2px;">🚨 LOST</div>
+                    </div>
+                    <div style="flex: 1; background: #f0fdf4; border: 1px solid #86efac; border-radius: 10px; padding: 12px 16px; text-align: center;">
+                        <div style="font-size: 28px; font-weight: 700; color: #16a34a;">${foundCount}</div>
+                        <div style="font-size: 11px; color: var(--sage); font-weight: 600; margin-top: 2px;">✅ REUNITED</div>
+                    </div>
+                </div>
+
+                <!-- Lost List -->
+                <div style="margin-bottom: 16px;">
+                    <h4 style="font-size: 13px; color: var(--vermilion); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 10px;">🚨 Currently Lost</h4>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        ${lostHtml || '<div style="text-align: center; color: var(--sage); font-size: 13px; padding: 16px; background: var(--paper); border-radius: 8px;">No active alerts 🎉</div>'}
+                    </div>
+                </div>
+
+                <!-- Reunited List -->
+                <div>
+                    <h4 style="font-size: 13px; color: #16a34a; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 10px;">✅ Reunited Today</h4>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        ${foundHtml || '<div style="text-align: center; color: var(--sage); font-size: 13px; padding: 16px; background: var(--paper); border-radius: 8px;">No reunions yet</div>'}
+                    </div>
+                </div>
+            `;
+        });
+
+        // Update badges
+        ['lostCountBadge', 'lostCountBadgeDindi'].forEach(badgeId => {
+            const badge = document.getElementById(badgeId);
+            if (!badge) return;
+            if (lostCount > 0) {
+                badge.style.display = 'inline-block';
+                badge.innerText = lostCount;
+            } else {
+                badge.style.display = 'none';
             }
-            if (badgeDindi) {
-                badgeDindi.style.display = 'inline-block';
-                badgeDindi.innerText = count;
-            }
-        }
-        
-        if (feedAuth) feedAuth.innerHTML = html;
-        if (feedDindi) feedDindi.innerHTML = html;
+        });
     });
 };
 
-window.resolveLostReport = async function(reportId) {
-    if (!confirm("Has this pilgrim been found and safely returned?")) return;
+window.resolveLostReport = async function(reportId, pilgrimName) {
+    if (!confirm(`Mark "${pilgrimName}" as Found and Reunited?`)) return;
     try {
-        await deleteDoc(doc(db, 'lostReports', reportId));
+        await updateDoc(doc(db, 'lostReports', reportId), {
+            status: 'found',
+            resolvedAt: new Date().toISOString()
+        });
+        // Feed updates automatically via onSnapshot
     } catch (error) {
         console.error("Error resolving report:", error);
-        alert("Failed to update status.");
+        alert("Failed to update status: " + error.message);
     }
 };
 
