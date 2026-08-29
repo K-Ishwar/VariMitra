@@ -4,98 +4,193 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VariMitra - Login</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="CSS/style.css">
     <style>
-        body {
-            background: radial-gradient(circle, var(--night-2) 0%, var(--night) 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        body { 
+            margin: 0; padding: 24px; font-family: 'Inter', sans-serif; 
+            background: linear-gradient(135deg, var(--night-2), var(--night));
+            min-height: 100vh; display: flex; align-items: center; justify-content: center;
+            box-sizing: border-box;
+        }
+        
+        .login-wrapper {
+            background: var(--paper);
+            max-width: 450px; width: 100%;
+            border-radius: 16px; padding: 48px 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            box-sizing: border-box;
+            animation: fadeIn 0.4s ease-out;
             position: relative;
         }
-        .lang-container {
-            position: absolute;
-            top: 24px;
-            right: 24px;
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-        .login-card {
-            width: 100%;
-            max-width: 400px;
+
+        .header-area {
             text-align: center;
-            box-sizing: border-box;
-            margin: 16px;
+            margin-bottom: 32px;
         }
-        .subtitle {
-            font-size: 14px;
-            color: var(--sage);
-            margin-top: 8px;
-            margin-bottom: 24px;
-            line-height: 1.5;
-            font-weight: 500;
-        }
-        .form-group {
+        
+        .hero-icon {
+            width: 64px;
+            height: 64px;
+            fill: var(--marigold);
             margin-bottom: 16px;
-            text-align: left;
         }
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            font-size: 14px;
-        }
-        .submit-btn {
-            width: 100%;
-            margin-top: 8px;
-        }
-        .register-link {
-            display: inline-block;
-            margin-top: 24px;
-            font-size: 14px;
-            color: var(--night);
-            text-decoration: none;
+        
+        .hero-title {
+            font-family: 'Fraunces', serif;
+            font-size: 24px;
+            color: var(--ink);
+            margin: 0 0 8px 0;
             font-weight: 600;
         }
-        .register-link:hover {
-            text-decoration: underline;
+        
+        .hero-subtitle {
+            font-size: 14px;
+            color: #8A7D63;
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .input-group { position: relative; margin-bottom: 24px; }
+        
+        .input-icon {
+            position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+            width: 20px; height: 20px; color: #8A7D63;
+        }
+
+        .login-input {
+            width: 100%; padding: 16px 16px 16px 48px; border: 1.5px solid var(--line);
+            border-radius: 12px; font-size: 16px; font-family: 'Inter', sans-serif;
+            color: var(--ink); box-sizing: border-box; background: #fff;
+            transition: border-color 0.2s; outline: none;
+        }
+
+        .login-input:focus { border-color: var(--marigold-deep); box-shadow: 0 0 0 3px rgba(230,172,39,0.2); }
+
+        .toggle-password {
+            position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
+            background: none; border: none; color: #8A7D63; cursor: pointer;
+            font-size: 14px; font-weight: 600; padding: 0;
+        }
+
+        .btn-signin {
+            width: 100%; height: 50px; background-color: var(--night); color: white;
+            border: none; border-radius: 12px; font-size: 16px; font-weight: 600;
+            font-family: inherit; cursor: pointer; margin-top: 8px;
+            transition: background-color 0.2s, transform 0.1s;
+            display: flex; align-items: center; justify-content: center; position: relative;
+        }
+        .btn-signin:hover { background-color: var(--night-2); }
+        .btn-signin:active { transform: scale(0.98); }
+
+        .btn-spinner {
+            display: none; width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .btn-signin.loading .btn-text { display: none; }
+        .btn-signin.loading .btn-spinner { display: block; }
+        .btn-signin.loading::after { content: 'Signing In...'; display: block; font-size: 15px; margin-left: 10px; }
+
+        .register-link {
+            display: block; text-align: center; margin-top: 32px; color: var(--sage);
+            text-decoration: none; font-size: 14px; font-weight: 600; transition: color 0.2s;
+        }
+        .register-link:hover { color: var(--marigold-deep); }
+
+        .langtoggle { position: absolute; top: 24px; right: 24px; }
+
+        @media (max-width: 600px) {
+            .login-wrapper { padding: 32px 24px; }
         }
     </style>
 </head>
 <body>
 
-    <div class="lang-container">
-        <div class="langtoggle">
-            <button id="btnEN" class="active">EN</button>
-            <button id="btnMR">MR</button>
-        </div>
+    <div class="langtoggle">
+        <button id="btnEN" class="active">EN</button>
+        <button id="btnMR">मरा</button>
     </div>
 
-    <div class="card login-card">
-        <div class="wordmark" style="font-size: 32px;">Vari<span>Mitra</span></div>
-        <div class="subtitle" data-i18n="auth_subtitle">Pilgrimage Management System</div>
-        
-        <form onsubmit="window.handleLogin(event)">
-            <div class="form-group">
-                <label for="username" data-i18n="auth_username">Username</label>
-                <input type="text" id="username" class="input-field" placeholder="Username" data-i18n-placeholder="auth_username" required>
+    <div class="login-wrapper">
+        <div class="header-area">
+            <div class="wordmark" style="font-size: 36px; margin-bottom: 16px;">Vari<span>Mitra</span></div>
+            <h1 class="hero-title" data-i18n="auth_main_title">Wari Management System</h1>
+            <p class="hero-subtitle" data-i18n="auth_welcome">Welcome Back</p>
+        </div>
+
+        <form onsubmit="handleLoginWithSpinner(event)">
+            <div class="input-group">
+                <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                <input type="text" id="username" class="login-input" placeholder="Username / Phone Number" data-i18n-placeholder="auth_username" required>
             </div>
             
-            <div class="form-group">
-                <label for="loginPass" data-i18n="auth_pass">Password</label>
-                <input type="password" id="loginPass" class="input-field" placeholder="Password" data-i18n-placeholder="auth_pass" required>
+            <div class="input-group">
+                <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                <input type="password" id="loginPass" class="login-input" placeholder="Password" data-i18n-placeholder="auth_pass" required>
+                <button type="button" class="toggle-password" data-i18n="auth_show" onclick="toggleVisibility()">SHOW</button>
             </div>
-            
-            <button type="submit" class="btn-primary submit-btn" data-i18n="auth_login_btn">Login</button>
+
+            <button type="submit" id="btnSignIn" class="btn-signin">
+                <span class="btn-text" data-i18n="auth_login_btn">Sign In</span>
+                <span class="btn-spinner"></span>
+            </button>
         </form>
-        
-        <a href="register.html" class="register-link" data-i18n="auth_reg_link">New User? Register Here</a>
+
+        <a href="register.html" class="register-link" data-i18n="auth_reg_link">New here? Register as a Pilgrim or NGO &rarr;</a>
     </div>
 
     <script>
-        // Dummy handleLogin to prevent form from submitting natively
-        window.handleLogin = function(event) {
+        function toggleVisibility() {
+            const passInput = document.getElementById('loginPass');
+            const toggleBtn = document.querySelector('.toggle-password');
+            const isMr = localStorage.getItem('lang') === 'mr';
+            
+            if (passInput.type === 'password') {
+                passInput.type = 'text';
+                toggleBtn.setAttribute('data-i18n', 'auth_hide');
+                toggleBtn.textContent = isMr ? 'लपवा' : 'HIDE';
+            } else {
+                passInput.type = 'password';
+                toggleBtn.setAttribute('data-i18n', 'auth_show');
+                toggleBtn.textContent = isMr ? 'दाखवा' : 'SHOW';
+            }
+        }
+
+        async function handleLoginWithSpinner(event) {
             event.preventDefault();
-            console.log("Login attempted");
+            const btn = document.getElementById('btnSignIn');
+            btn.classList.add('loading');
+            btn.disabled = true;
+
+            setTimeout(() => {
+                if (window.handleLogin) {
+                    try {
+                        const result = window.handleLogin(event);
+                        if (result instanceof Promise) {
+                            result.finally(() => {
+                                btn.classList.remove('loading');
+                                btn.disabled = false;
+                            });
+                        } else {
+                            btn.classList.remove('loading');
+                            btn.disabled = false;
+                        }
+                    } catch (e) {
+                        btn.classList.remove('loading');
+                        btn.disabled = false;
+                    }
+                } else {
+                    btn.classList.remove('loading');
+                    btn.disabled = false;
+                }
+            }, 300);
         }
     </script>
     <script type="module" src="js/config.js"></script>
