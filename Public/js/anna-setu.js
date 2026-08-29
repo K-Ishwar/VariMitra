@@ -74,6 +74,16 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
     return R * c;
 }
 
+// Helper: Format 24h time to 12h AM/PM
+function formatTime12h(time24) {
+    if (!time24) return '';
+    const [h, m] = time24.split(':');
+    let hours = parseInt(h, 10);
+    const suffix = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12 || 12;
+    return `${hours}:${m} ${suffix}`;
+}
+
 let donorSearchTimeout;
 window.searchDonorLoc = function(query) {
     const resultsEl = document.getElementById('donorLocResults');
@@ -229,7 +239,7 @@ window.searchSevaPoints = async function() {
                             </p>
                         </div>
                     </div>
-                    <button class="action-btn" onclick="openDonateModal('${stop.id}', '${stop.dindiId}', '${safeLocation}')">Offer Donation to this Dindi</button>
+                    <button class="action-btn" onclick="openDonateModal('${stop.id}', '${stop.dindiId}', '${safeLocation}', '${stop.dindiName}')">Offer Donation to this Dindi</button>
                 </div>
             `;
         });
@@ -240,9 +250,11 @@ window.searchSevaPoints = async function() {
     }
 };
 
-window.openDonateModal = function(stopId, dindiId, locationName) {
+window.openDonateModal = function(stopId, dindiId, locationName, dindiName) {
     document.getElementById('modalStopId').value = stopId;
     document.getElementById('modalDindiId').value = dindiId;
+    document.getElementById('modalLocationName').value = locationName;
+    document.getElementById('modalDindiName').value = dindiName;
     document.getElementById('modalStopName').textContent = 'Location: ' + locationName;
     
     document.getElementById('donateModal').classList.add('active');
@@ -251,15 +263,27 @@ window.openDonateModal = function(stopId, dindiId, locationName) {
 window.closeDonateModal = function() {
     document.getElementById('donateModal').classList.remove('active');
     document.getElementById('modalQuantity').value = '';
-    document.getElementById('modalTime').value = '';
+    document.getElementById('modalHr').value = '5';
+    document.getElementById('modalMin').value = '00';
+    document.getElementById('modalAmPm').value = 'PM';
 };
 
 window.submitDonation = async function() {
     const stopId = document.getElementById('modalStopId').value;
     const dindiId = document.getElementById('modalDindiId').value;
+    const locationName = document.getElementById('modalLocationName').value;
+    const dindiName = document.getElementById('modalDindiName').value;
     const itemType = document.getElementById('modalItemType').value;
     const quantity = document.getElementById('modalQuantity').value;
-    const time = document.getElementById('modalTime').value;
+    
+    let hr = parseInt(document.getElementById('modalHr').value, 10);
+    const min = document.getElementById('modalMin').value;
+    const ampm = document.getElementById('modalAmPm').value;
+
+    if (ampm === 'PM' && hr !== 12) hr += 12;
+    if (ampm === 'AM' && hr === 12) hr = 0;
+    
+    const time = `${hr.toString().padStart(2, '0')}:${min}`;
 
     if (!quantity || !time) {
         alert("Please fill all fields.");
@@ -278,6 +302,8 @@ window.submitDonation = async function() {
             donorId: currentUser.id || currentUser.username,
             donorName: currentUser.name,
             donorPhone: currentUser.username, // Using username as phone
+            dindiName: dindiName || 'Unknown Dindi',
+            locationName: locationName || 'Unknown Location',
             itemType: itemType,
             quantity: quantity,
             proposedTime: time,
@@ -328,11 +354,11 @@ async function loadDonorRequests() {
             }
 
             list.innerHTML += `
-                <div class="card">
+                <div class="card" style="border-left: 4px solid var(--marigold); transition: transform 0.2s;">
                     <div class="card-header">
                         <div>
-                            <div class="card-title">${req.itemType}: ${req.quantity}</div>
-                            <div class="card-subtitle">Proposed Time: ${req.proposedTime}</div>
+                            <div class="card-title">📦 ${req.itemType}: ${req.quantity}</div>
+                            <div class="card-subtitle" style="margin-top: 4px;">🕒 Proposed Time: <b>${formatTime12h(req.proposedTime)}</b></div>
                         </div>
                         <span class="badge ${badgeClass}">${badgeText}</span>
                     </div>
@@ -418,17 +444,17 @@ async function loadLeaderIncoming() {
             hasPending = true;
 
             list.innerHTML += `
-                <div class="card" id="req-${docSnap.id}">
+                <div class="card" id="req-${docSnap.id}" style="border-left: 4px solid var(--vermilion); transition: transform 0.2s;">
                     <div class="card-header">
                         <div>
-                            <div class="card-title">${req.donorName}</div>
-                            <div class="card-subtitle">${req.donorPhone}</div>
+                            <div class="card-title">👤 ${req.donorName}</div>
+                            <div class="card-subtitle">📞 ${req.donorPhone}</div>
                         </div>
                         <span class="badge pending">Pending</span>
                     </div>
-                    <div style="font-size:14px; margin-bottom:10px;">
-                        <b>${req.itemType}:</b> ${req.quantity}<br>
-                        <b>Time:</b> ${req.proposedTime}
+                    <div style="font-size:14px; margin-bottom:12px; background: var(--paper-2); padding: 10px; border-radius: 8px;">
+                        <b style="color: var(--ink);">📦 ${req.itemType}:</b> ${req.quantity}<br>
+                        <b style="color: var(--ink);">🕒 Time:</b> ${formatTime12h(req.proposedTime)}
                     </div>
                     <div class="btn-row">
                         <button class="action-btn danger" onclick="updateDonationStatus('${docSnap.id}', 'rejected', '${req.donorPhone}')">Reject</button>
@@ -465,19 +491,22 @@ async function loadLeaderAccepted() {
             hasAccepted = true;
 
             list.innerHTML += `
-                <div class="card" id="req-${docSnap.id}">
+                <div class="card" style="border-left: 4px solid var(--sage); transition: transform 0.2s;">
                     <div class="card-header">
                         <div>
-                            <div class="card-title">${req.donorName}</div>
-                            <div class="card-subtitle">${req.donorPhone}</div>
+                            <div class="card-title">👤 ${req.donorName}</div>
+                            <div class="card-subtitle">📞 ${req.donorPhone}</div>
                         </div>
-                        <span class="badge">Accepted ✓</span>
+                        <span class="badge" style="background:#dcfce7; color:#166534;">Accepted ✓</span>
                     </div>
-                    <div style="font-size:14px; margin-bottom:10px;">
-                        <b>${req.itemType}:</b> ${req.quantity}<br>
-                        <b>Expected Time:</b> ${req.proposedTime}
+                    <div style="font-size:14px; margin-bottom:12px; background: var(--paper-2); padding: 10px; border-radius: 8px;">
+                        <b style="color: var(--ink);">📦 ${req.itemType}:</b> ${req.quantity}<br>
+                        <b style="color: var(--ink);">🕒 Time:</b> ${formatTime12h(req.proposedTime)}
                     </div>
-                    <button class="action-btn success" style="width:100%" onclick="updateDonationStatus('${docSnap.id}', 'completed', '${req.donorPhone}')">Mark as Received</button>
+                    <div class="btn-row">
+                        <a href="https://wa.me/91${req.donorPhone}" target="_blank" class="action-btn secondary" style="display:flex; justify-content:center; align-items:center; text-decoration:none;">💬 WhatsApp</a>
+                        <button class="action-btn success" onclick="updateDonationStatus('${docSnap.id}', 'completed', '${req.donorPhone}')">Mark Received</button>
+                    </div>
                 </div>
             `;
         });

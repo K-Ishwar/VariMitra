@@ -285,6 +285,9 @@
                     </div>
 
                     <div id="donor-requests" class="content-section">
+                        <button class="action-btn secondary" style="margin-bottom: 16px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;" onclick="switchDonorTab('explore')">
+                            ← Back to Offer Donation
+                        </button>
                         <div id="requests-list-donor">
                             <!-- Requests populated by JS -->
                         </div>
@@ -325,15 +328,20 @@
 
     <!-- DONATION MODAL (For Donors) -->
     <div class="modal-overlay" id="donateModal">
-        <div class="modal">
-            <h2 style="margin-bottom:5px; font-size:22px; color: var(--ink);">Offer Donation</h2>
-            <p id="modalStopName" style="color:#7a6d54; font-size:14px; margin-bottom:24px;">Dindi at Location</p>
+        <div class="modal" style="padding: 0; overflow: hidden;">
+            <div style="background: linear-gradient(135deg, rgba(242,169,59,0.15), var(--paper-2)); padding: 24px 24px 16px; border-bottom: 1px solid var(--line); text-align: center;">
+                <h2 style="margin:0 0 5px 0; font-size:24px; color: var(--ink); font-family: var(--font-heading);">💖 <span data-i18n="modal_offer_donation">Offer Donation</span></h2>
+                <p id="modalStopName" style="color:#7a6d54; font-size:14px; margin:0; font-weight: 500;">Dindi at Location</p>
+            </div>
+            <div style="padding: 24px;">
             
             <input type="hidden" id="modalStopId">
             <input type="hidden" id="modalDindiId">
+            <input type="hidden" id="modalLocationName">
+            <input type="hidden" id="modalDindiName">
 
             <div class="input-group">
-                <label>Type of Seva</label>
+                <label>📦 <span data-i18n="type_of_seva">Type of Seva</span></label>
                 <select id="modalItemType">
                     <option value="Food">Food / Meals</option>
                     <option value="Water">Drinking Water</option>
@@ -343,18 +351,45 @@
             </div>
             
             <div class="input-group">
-                <label>Quantity / Description</label>
+                <label>✍️ <span data-i18n="qty_desc">Quantity / Description</span></label>
                 <input type="text" id="modalQuantity" placeholder="e.g., Poha for 500 people" required>
             </div>
             
             <div class="input-group">
-                <label>Proposed Time of Arrival</label>
-                <input type="time" id="modalTime" min="17:00" required>
+                <label>🕒 <span data-i18n="proposed_time">Proposed Time of Arrival</span></label>
+                <div style="display: flex; gap: 8px;">
+                    <select id="modalHr" required style="flex: 1;">
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5" selected>5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                        <option value="9">9</option>
+                        <option value="10">10</option>
+                        <option value="11">11</option>
+                        <option value="12">12</option>
+                    </select>
+                    <span style="display: flex; align-items: center; font-weight: bold; color: var(--ink);">:</span>
+                    <select id="modalMin" required style="flex: 1;">
+                        <option value="00">00</option>
+                        <option value="15">15</option>
+                        <option value="30">30</option>
+                        <option value="45">45</option>
+                    </select>
+                    <select id="modalAmPm" required style="flex: 1;">
+                        <option value="AM">AM</option>
+                        <option value="PM" selected>PM</option>
+                    </select>
+                </div>
             </div>
             
-            <div class="btn-row" style="margin-top: 24px;">
-                <button class="action-btn secondary" onclick="closeDonateModal()">Cancel</button>
-                <button class="action-btn" onclick="submitDonation()">Send Request</button>
+            <div class="btn-row" style="margin-top: 32px;">
+                <button class="action-btn secondary" onclick="closeDonateModal()" data-i18n="modal_cancel">Cancel</button>
+                <button class="action-btn" onclick="submitDonation()" data-i18n="send_request">Send Request</button>
+            </div>
             </div>
         </div>
     </div>
@@ -373,8 +408,8 @@
         </div>
     </div>
 
-    <script type="module" src="js/config.js"></script>
-    <script type="module" src="js/main.js"></script>
-    <script type="module" src="js/anna-setu.js"></script>
+    <script type="module" src="js/config.js?v=1.1"></script>
+    <script type="module" src="js/main.js?v=1.1"></script>
+    <script type="module" src="js/anna-setu.js?v=1.2"></script>
 </body>
 </html>
