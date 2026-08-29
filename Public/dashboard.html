@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,37 +20,44 @@
             padding: 8px 12px;
             font-weight: 500;
         }
+
         .nav-btn:hover {
             text-decoration: underline;
             color: var(--marigold-deep);
         }
+
         .logout-btn {
             color: var(--vermilion);
         }
+
         .logout-btn:hover {
             color: var(--vermilion);
             text-decoration: underline;
         }
+
         .nav-links {
             display: flex;
             align-items: center;
             gap: 12px;
             flex-wrap: wrap;
         }
+
         .dashboard-content {
             padding: 32px 0;
         }
+
         .role-panel {
             display: none;
         }
     </style>
 </head>
+
 <body>
 
     <div class="app-container">
         <nav class="navbar">
             <div class="wordmark">Vari<span>Mitra</span></div>
-            
+
             <div class="nav-links">
                 <!-- Role-specific Nav Buttons (all hidden by default) -->
                 <button id="nav-alerts" class="nav-btn" data-i18n="nav_alerts">Emergency Alerts</button>
@@ -57,13 +65,13 @@
                 <button id="nav-lostfound" class="nav-btn" data-i18n="nav_lostfound">Lost & Found</button>
                 <button id="nav-sanitation" class="nav-btn" data-i18n="nav_sanitation">Sanitation</button>
                 <button id="nav-map" class="nav-btn" data-i18n="nav_map">Live Map</button>
-                
+
                 <!-- Language Toggle -->
                 <div class="langtoggle" style="margin-left: 8px; margin-right: 8px;">
                     <button id="btnEN" class="active">EN</button>
                     <button id="btnMR">MR</button>
                 </div>
-                
+
                 <!-- Logout Button -->
                 <button id="nav-logout" class="nav-btn logout-btn" data-i18n="logout">Log Out</button>
             </div>
@@ -71,7 +79,8 @@
 
         <main class="dashboard-content">
             <div style="margin-bottom: 24px;">
-                <h2 style="margin: 0; font-size: 24px;"><span data-i18n="welcome">Welcome</span>, <span id="displayRole" style="color: var(--marigold-deep);">User</span></h2>
+                <h2 style="margin: 0; font-size: 24px;"><span data-i18n="welcome">Welcome</span>, <span id="displayRole"
+                        style="color: var(--marigold-deep);">User</span></h2>
             </div>
 
             <!-- SPA Role Panels (all hidden by default) -->
@@ -87,29 +96,45 @@
 
             <div id="panel-dindi" class="role-panel card">
                 <h3 data-i18n="title_dindi">Dindi Leader Dashboard</h3>
-                <div style="position: relative; margin-top: 16px; z-index: 1000;">
-                    <label for="startVillageInput" style="display:block; margin-bottom: 8px; font-weight: 500;">Starting Village</label>
-                    <input type="text" id="startVillageInput" class="input-field" placeholder="Search Starting Village..." oninput="window.searchStartLocation(this.value)">
-                    <div id="startVillageDropdown" class="autocomplete-results"></div>
+                
+                <div id="dindiMap"
+                    style="height: 400px; width: 100%; margin-top: 16px; margin-bottom: 24px; border-radius: 8px; border: 1px solid var(--line); z-index: 1;">
                 </div>
+                
+                <div id="savedRouteView" style="display: none; margin-top: 16px;"></div>
 
-                <div style="display: flex; gap: 16px; margin-top: 16px;">
-                    <div style="flex: 1;">
-                        <label for="startDate" style="display:block; margin-bottom: 8px; font-weight: 500;">Start Date</label>
-                        <input type="date" id="startDate" class="input-field" required>
+                <div id="dindiPlannerSetup">
+                    <div style="position: relative; margin-top: 16px; z-index: 1000;">
+                        <label for="startVillageInput"
+                            style="display:block; margin-bottom: 8px; font-weight: 500;">Starting Village</label>
+                        <input type="text" id="startVillageInput" class="input-field"
+                            placeholder="Search Starting Village..." oninput="window.searchStartLocation(this.value)">
+                        <div id="startVillageDropdown" class="autocomplete-results"></div>
                     </div>
-                    <div style="flex: 1;">
-                        <label for="endDate" style="display:block; margin-bottom: 8px; font-weight: 500;">End Date (Pandharpur)</label>
-                        <input type="date" id="endDate" class="input-field" required>
+
+                    <div style="display: flex; gap: 16px; margin-top: 16px;">
+                        <div style="flex: 1;">
+                            <label for="startDate" style="display:block; margin-bottom: 8px; font-weight: 500;">Start
+                                Date</label>
+                            <input type="date" id="startDate" class="input-field" required>
+                        </div>
+                        <div style="flex: 1;">
+                            <label for="endDate" style="display:block; margin-bottom: 8px; font-weight: 500;">End Date
+                                (Pandharpur)</label>
+                            <input type="date" id="endDate" class="input-field" required>
+                        </div>
                     </div>
+
+                    <button class="btn-primary" style="margin-top: 16px; width: 100%;"
+                        onclick="window.generateRouteForm()">Generate Route Form</button>
+
+                    <!-- Container for generated day rows -->
+                    <div id="routePlanContainer" style="margin-top: 24px;"></div>
+
+                    <button id="submitRouteBtn" class="btn-primary"
+                        style="margin-top: 16px; width: 100%; display: none; background: #43A047; color: white; border: none; font-weight: 600;"
+                        onclick="window.submitDindiRoute()">Submit Route to Database</button>
                 </div>
-                
-                <button class="btn-primary" style="margin-top: 16px; width: 100%;" onclick="window.generateRouteForm()">Generate Route Form</button>
-                
-                <!-- Container for generated day rows -->
-                <div id="routePlanContainer" style="margin-top: 24px;"></div>
-                
-                <div id="dindiMap" style="height: 400px; width: 100%; margin-top: 24px; border-radius: 8px; border: 1px solid var(--line); z-index: 1;"></div>
             </div>
 
             <div id="panel-ngo" class="role-panel card">
@@ -135,4 +160,5 @@
     <script type="module" src="js/modules/authority.js"></script>
     <script type="module" src="js/modules/ngo.js"></script>
 </body>
+
 </html>
