@@ -316,129 +316,88 @@
 
                         <!-- Pilgrim Registry Tab Content -->
                         <div id="dindi-tab-registry" class="dindi-tab-content" style="display: none;">
-                            <div class="card" style="margin-bottom: 24px;">
+                            <!-- Registered Pilgrims List -->
+                            <div class="card" id="registeredPilgrimsSection" style="margin-bottom: 24px; display: none;">
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
                                     <h3 style="margin: 0;">Pilgrim Registry</h3>
-                                    <button class="btn-primary" style="background-color: var(--marigold); color: var(--ink); padding: 8px 16px;" onclick="document.getElementById('profile-drawer').classList.add('open')">+ Register New Pilgrim</button>
+                                    <button class="btn-primary" style="background-color: var(--marigold); color: var(--ink); padding: 8px 16px;" onclick="document.getElementById('registeredPilgrimsSection').style.display='none'; document.getElementById('addPilgrimSection').style.display='block';">+ Register New Pilgrim</button>
                                 </div>
-                                
-                                <div id="pilgrim-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;">
-                                    <!-- Placeholder Pilgrim 1 -->
-                                    <div style="border: 1px solid var(--line); border-radius: 12px; padding: 16px; display: flex; align-items: center; justify-content: space-between; background: var(--paper-2);">
-                                        <div style="display: flex; align-items: center; gap: 12px;">
-                                            <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--night); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600;">S</div>
-                                            <div>
-                                                <div style="font-weight: 600; font-size: 15px; color: var(--ink);">Sudhir Patil</div>
-                                                <div style="font-size: 12px; color: var(--sage);">Pune</div>
-                                            </div>
-                                        </div>
-                                        <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
-                                            <span style="background: rgba(193, 67, 43, 0.1); color: var(--vermilion); padding: 2px 8px; border-radius: 50px; font-size: 11px; font-weight: 700;">O+</span>
-                                            <button style="background: none; border: 1px solid var(--line); padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; color: var(--ink);">View QR Badge</button>
-                                        </div>
-                                    </div>
+                                <div id="registeredPilgrimsList" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;">
+                                    <p style="color: var(--sage); font-style: italic;">Loading registry...</p>
+                                </div>
+                            </div>
 
-                                    <!-- Placeholder Pilgrim 2 -->
-                                    <div style="border: 1px solid var(--line); border-radius: 12px; padding: 16px; display: flex; align-items: center; justify-content: space-between; background: var(--paper-2);">
-                                        <div style="display: flex; align-items: center; gap: 12px;">
-                                            <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--night); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600;">A</div>
-                                            <div>
-                                                <div style="font-weight: 600; font-size: 15px; color: var(--ink);">Anil Deshmukh</div>
-                                                <div style="font-size: 12px; color: var(--sage);">Solapur</div>
-                                            </div>
+                            <!-- Add New Pilgrim Form -->
+                            <div class="card" id="addPilgrimSection" style="margin-bottom: 24px; display: block;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+                                    <h3 style="margin: 0;">Add New Pilgrim</h3>
+                                    <button class="btn-primary" onclick="document.getElementById('registeredPilgrimsSection').style.display='block'; document.getElementById('addPilgrimSection').style.display='none';" id="showRegisteredPilgrimsBtn" style="background: var(--night); padding: 8px 16px; font-size: 14px;">View Registered Pilgrims</button>
+                                </div>
+                                <form id="pilgrimRegistryForm" onsubmit="window.submitPilgrimRegistry(event)">
+                                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                                        <div style="grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 2px dashed var(--line); padding: 16px; border-radius: 8px;">
+                                            <label for="pilgrimPhoto" style="cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 8px;">
+                                                <div style="width: 80px; height: 80px; border-radius: 50%; background: var(--line); display: flex; align-items: center; justify-content: center; overflow: hidden;" id="photoPreviewContainer">
+                                                    <span style="font-size: 32px; color: var(--sage);">📷</span>
+                                                </div>
+                                                <span style="font-size: 14px; color: var(--ink); font-weight: 500;">Upload Photo</span>
+                                            </label>
+                                            <input type="file" id="pilgrimPhoto" accept="image/*" style="display: none;" onchange="window.previewPilgrimPhoto(event)">
                                         </div>
-                                        <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
-                                            <span style="background: rgba(193, 67, 43, 0.1); color: var(--vermilion); padding: 2px 8px; border-radius: 50px; font-size: 11px; font-weight: 700;">B+</span>
-                                            <button style="background: none; border: 1px solid var(--line); padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; color: var(--ink);">View QR Badge</button>
+        
+                                        <div>
+                                            <label style="display:block; margin-bottom: 4px; font-weight: 500;">Full Name</label>
+                                            <input type="text" id="pilgrimFullName" class="input-field" required>
+                                        </div>
+                                        <div>
+                                            <label style="display:block; margin-bottom: 4px; font-weight: 500;">Age</label>
+                                            <input type="number" id="pilgrimAge" class="input-field" required min="1" max="120">
+                                        </div>
+                                        <div>
+                                            <label style="display:block; margin-bottom: 4px; font-weight: 500;">Blood Group</label>
+                                            <select id="pilgrimBloodGroup" class="input-field" required>
+                                                <option value="">Select...</option>
+                                                <option value="A+">A+</option>
+                                                <option value="A-">A-</option>
+                                                <option value="B+">B+</option>
+                                                <option value="B-">B-</option>
+                                                <option value="O+">O+</option>
+                                                <option value="O-">O-</option>
+                                                <option value="AB+">AB+</option>
+                                                <option value="AB-">AB-</option>
+                                            </select>
+                                        </div>
+                                        <div style="grid-column: 1 / -1;">
+                                            <label style="display:block; margin-bottom: 4px; font-weight: 500;">Medical Condition</label>
+                                            <select id="pilgrimMedicalSelect" class="input-field" required onchange="window.toggleMedicalOther(this.value)">
+                                                <option value="">Select...</option>
+                                                <option value="All Good">All Good</option>
+                                                <option value="Asthma">Asthma</option>
+                                                <option value="Diabetes">Diabetes</option>
+                                                <option value="Blood Pressure">Blood Pressure</option>
+                                                <option value="Heart Condition">Heart Condition</option>
+                                                <option value="Other">Other (Please Specify)</option>
+                                            </select>
+                                            <input type="text" id="pilgrimMedicalOther" class="input-field" style="display: none; margin-top: 8px;" placeholder="Specify medical issue...">
+                                        </div>
+                                        <div>
+                                            <label style="display:block; margin-bottom: 4px; font-weight: 500;">Emergency Contact Name</label>
+                                            <input type="text" id="pilgrimEmergencyContact" class="input-field" required>
+                                        </div>
+                                        <div>
+                                            <label style="display:block; margin-bottom: 4px; font-weight: 500;">Emergency Phone</label>
+                                            <input type="tel" id="pilgrimEmergencyPhone" class="input-field" required pattern="[0-9]{10}">
                                         </div>
                                     </div>
-                                </div>
+                                    <button type="submit" class="btn-primary" style="margin-top: 16px; background: var(--marigold); width: 100%;">Register Pilgrim</button>
+                                </form>
                             </div>
                         </div>
                     </div>
                 </div>
                 </div> <!-- End of Route Planner Tab -->
 
-                <!-- Tab 2: Pilgrim Registry -->
-                <div id="dindi-content-registry" style="display: none;">
-                    
-                    <!-- Registered Pilgrims List (Hidden by default) -->
-                    <div class="card" id="registeredPilgrimsSection" style="margin-bottom: 24px; background: var(--paper-2); display: none;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                            <h4 style="margin: 0; color: var(--marigold-deep);">Registered Pilgrims</h4>
-                            <button onclick="document.getElementById('registeredPilgrimsSection').style.display='none'; document.getElementById('addPilgrimSection').style.display='block';" style="background:none; border:none; color:var(--vermilion); cursor:pointer; font-size: 24px;">&times;</button>
-                        </div>
-                        <div id="registeredPilgrimsList">
-                            <p style="color: var(--sage); font-style: italic;">Loading registry...</p>
-                        </div>
-                    </div>
 
-                    <!-- Add New Pilgrim Form (Visible by default) -->
-                    <div class="card" id="addPilgrimSection" style="background: var(--paper-2); display: block;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                            <h4 style="margin: 0; color: var(--marigold-deep);">Add New Pilgrim</h4>
-                            <button class="btn-primary" onclick="document.getElementById('registeredPilgrimsSection').style.display='block'; this.parentNode.parentNode.style.display='none';" id="showRegisteredPilgrimsBtn" style="background: var(--night); padding: 8px 16px; font-size: 14px;">View Registered Pilgrims</button>
-                        </div>
-                        <form id="pilgrimRegistryForm" onsubmit="window.submitPilgrimRegistry(event)">
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
-                                <div style="grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 2px dashed var(--line); padding: 16px; border-radius: 8px;">
-                                    <label for="pilgrimPhoto" style="cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 8px;">
-                                        <div style="width: 80px; height: 80px; border-radius: 50%; background: var(--line); display: flex; align-items: center; justify-content: center; overflow: hidden;" id="photoPreviewContainer">
-                                            <span style="font-size: 32px; color: var(--sage);">📷</span>
-                                        </div>
-                                        <span style="font-size: 14px; color: var(--ink); font-weight: 500;">Upload Photo</span>
-                                    </label>
-                                    <input type="file" id="pilgrimPhoto" accept="image/*" style="display: none;" onchange="window.previewPilgrimPhoto(event)">
-                                </div>
-
-                                <div>
-                                    <label style="display:block; margin-bottom: 4px; font-weight: 500;">Full Name</label>
-                                    <input type="text" id="pilgrimFullName" class="input-field" required>
-                                </div>
-                                <div>
-                                    <label style="display:block; margin-bottom: 4px; font-weight: 500;">Age</label>
-                                    <input type="number" id="pilgrimAge" class="input-field" required min="1" max="120">
-                                </div>
-                                <div>
-                                    <label style="display:block; margin-bottom: 4px; font-weight: 500;">Blood Group</label>
-                                    <select id="pilgrimBloodGroup" class="input-field" required>
-                                        <option value="">Select...</option>
-                                        <option value="A+">A+</option>
-                                        <option value="A-">A-</option>
-                                        <option value="B+">B+</option>
-                                        <option value="B-">B-</option>
-                                        <option value="O+">O+</option>
-                                        <option value="O-">O-</option>
-                                        <option value="AB+">AB+</option>
-                                        <option value="AB-">AB-</option>
-                                    </select>
-                                </div>
-                                <div style="grid-column: 1 / -1;">
-                                    <label style="display:block; margin-bottom: 4px; font-weight: 500;">Medical Condition</label>
-                                    <select id="pilgrimMedicalSelect" class="input-field" required onchange="window.toggleMedicalOther(this.value)">
-                                        <option value="">Select...</option>
-                                        <option value="All Good">All Good</option>
-                                        <option value="Asthma">Asthma</option>
-                                        <option value="Diabetes">Diabetes</option>
-                                        <option value="Blood Pressure">Blood Pressure</option>
-                                        <option value="Heart Condition">Heart Condition</option>
-                                        <option value="Other">Other (Please Specify)</option>
-                                    </select>
-                                    <input type="text" id="pilgrimMedicalOther" class="input-field" style="display: none; margin-top: 8px;" placeholder="Specify medical issue...">
-                                </div>
-                                <div>
-                                    <label style="display:block; margin-bottom: 4px; font-weight: 500;">Emergency Contact Name</label>
-                                    <input type="text" id="pilgrimEmergencyContact" class="input-field" required>
-                                </div>
-                                <div>
-                                    <label style="display:block; margin-bottom: 4px; font-weight: 500;">Emergency Phone</label>
-                                    <input type="tel" id="pilgrimEmergencyPhone" class="input-field" required pattern="[0-9]{10}">
-                                </div>
-                            </div>
-                            <button type="submit" class="btn-primary" style="margin-top: 16px; background: var(--marigold); width: 100%;">Register Pilgrim</button>
-                        </form>
-                    </div>
-                </div> <!-- End of Pilgrim Registry Tab -->
 
             </div>
 
