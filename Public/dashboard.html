@@ -75,9 +75,92 @@
             </div>
 
             <!-- SPA Role Panels (all hidden by default) -->
-            <div id="panel-super" class="role-panel card">
-                <h3 data-i18n="title_super">Super Admin Dashboard</h3>
-                <p>System configuration and global metrics.</p>
+            <div id="panel-super" class="role-panel">
+                <!-- Top Stats Bar -->
+                <div class="stats-bar" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px;">
+                    <div class="card" style="border-top: 4px solid var(--marigold);">
+                        <div style="font-size: 14px; color: var(--sage); font-weight: 600;">🏴 Active Dindis</div>
+                        <div id="stat-dindis" style="font-family: var(--font-heading); font-size: 48px; color: var(--night);">0</div>
+                    </div>
+                    <div class="card" style="border-top: 4px solid var(--marigold);">
+                        <div style="font-size: 14px; color: var(--sage); font-weight: 600;">🏥 Registered NGOs</div>
+                        <div id="stat-ngos" style="font-family: var(--font-heading); font-size: 48px; color: var(--night);">0</div>
+                    </div>
+                    <div class="card" style="border-top: 4px solid var(--marigold);">
+                        <div style="font-size: 14px; color: var(--sage); font-weight: 600;">🙏 Total Pilgrims</div>
+                        <div id="stat-pilgrims" style="font-family: var(--font-heading); font-size: 48px; color: var(--night);">0</div>
+                    </div>
+                </div>
+
+                <!-- Authority Creation Form -->
+                <div class="card" style="margin-bottom: 24px;">
+                    <h3 style="margin-top: 0;">Create Authority Account</h3>
+                    <form onsubmit="window.createAuthority(event)">
+                        <div style="display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap;">
+                            <div style="flex: 1; min-width: 200px;">
+                                <label style="display:block; margin-bottom:8px; font-weight:500;">Authority Type</label>
+                                <select id="auth-type" class="input-field" required>
+                                    <option value="">Select Type...</option>
+                                    <option value="police">Police Dept</option>
+                                    <option value="health">Health Dept</option>
+                                    <option value="admin">District Admin</option>
+                                </select>
+                            </div>
+                            <div style="flex: 1; min-width: 200px;">
+                                <label style="display:block; margin-bottom:8px; font-weight:500;">Username (Name)</label>
+                                <input type="text" id="auth-username" class="input-field" required>
+                            </div>
+                            <div style="flex: 1; min-width: 200px;">
+                                <label style="display:block; margin-bottom:8px; font-weight:500;">Password</label>
+                                <input type="password" id="auth-password" class="input-field" required>
+                            </div>
+                            <div style="margin-top: 8px;">
+                                <button type="submit" class="btn-primary" style="height: 43px;">Create Account</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- 2-Column Content Area -->
+                <div style="display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap;">
+                    
+                    <!-- Left Column: NGO Approval Queue (60%) -->
+                    <div class="card" style="flex: 1 1 50%; min-width: 300px;">
+                        <h3 style="margin-top: 0;">NGO Approval Queue</h3>
+                        <div id="ngo-queue-list">
+                            <!-- Rows injected by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Dindi Directory (40%) -->
+                    <div class="card" style="flex: 1 1 30%; min-width: 300px;">
+                        <h3 style="margin-top: 0;">Dindi Directory</h3>
+                        <input type="text" id="dindi-search" class="input-field" placeholder="Search Dindis..." style="margin-bottom: 16px;">
+                        <div id="dindi-directory-list" style="max-height: 400px; overflow-y: auto;">
+                            <!-- Rows injected by JS -->
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- User Management Section -->
+                <div class="card" style="margin-top: 24px;">
+                    <h3 style="margin-top: 0; margin-bottom: 16px;">User Management</h3>
+                    
+                    <!-- Tabs -->
+                    <div style="display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid var(--line); padding-bottom: 12px; overflow-x: auto;">
+                        <button class="btn-primary" id="tab-btn-authority" onclick="window.switchUserTab('authority')" style="background-color: var(--night);">Authorities</button>
+                        <button class="btn-primary" id="tab-btn-dindi_leader" onclick="window.switchUserTab('dindi_leader')" style="background-color: var(--paper-2); color: var(--ink);">Dindi Leaders</button>
+                        <button class="btn-primary" id="tab-btn-ngo" onclick="window.switchUserTab('ngo')" style="background-color: var(--paper-2); color: var(--ink);">NGOs</button>
+                        <button class="btn-primary" id="tab-btn-public" onclick="window.switchUserTab('public')" style="background-color: var(--paper-2); color: var(--ink);">Public</button>
+                    </div>
+
+                    <!-- User List Container -->
+                    <div id="user-management-list" style="max-height: 500px; overflow-y: auto;">
+                        <!-- Rows injected by JS -->
+                    </div>
+                </div>
+
             </div>
 
             <div id="panel-authority" class="role-panel card">
@@ -124,6 +207,15 @@
         </main>
     </div>
 
+    <!-- Side Drawer for Profile -->
+    <div id="profile-drawer" class="drawer">
+        <div class="drawer-header">
+            <h3 id="drawer-title" style="margin:0;">Profile Details</h3>
+            <button onclick="window.closeDrawer()" style="background:none; border:none; font-size:24px; cursor:pointer;">&times;</button>
+        </div>
+        <div id="drawer-content" class="drawer-content"></div>
+    </div>
+
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <!-- Application Scripts -->
@@ -134,5 +226,6 @@
     <script type="module" src="js/modules/qr.js"></script>
     <script type="module" src="js/modules/authority.js"></script>
     <script type="module" src="js/modules/ngo.js"></script>
+    <script type="module" src="js/modules/superadmin.js"></script>
 </body>
 </html>

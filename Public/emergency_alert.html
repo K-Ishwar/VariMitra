@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VariMitra - Emergency Alert System</title>
+    <link rel="stylesheet" href="CSS/style.css">
+    <style>
+        body {
+            background-color: var(--paper);
+        }
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 16px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+        .pill-toggle {
+            display: inline-flex;
+            background-color: var(--paper-2);
+            border-radius: 50px;
+            padding: 4px;
+            border: 1px solid var(--line);
+        }
+        .pill-toggle button {
+            background: transparent;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 600;
+            color: var(--ink);
+            transition: all 0.2s ease;
+        }
+        .pill-toggle button.active {
+            background-color: var(--vermilion);
+            color: white;
+        }
+        
+        .form-group {
+            margin-bottom: 24px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--night);
+        }
+        select.input-field {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%231B2340%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+            background-repeat: no-repeat, repeat;
+            background-position: right .7em top 50%, 0 0;
+            background-size: .65em auto, 100%;
+        }
+
+        .preview-card {
+            background-color: var(--night);
+            color: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 32px;
+            border: 1px solid var(--night-2);
+        }
+        .preview-title {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--marigold);
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+        .preview-content {
+            font-size: 16px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+
+        .btn-dispatch {
+            width: 100%;
+            background-color: var(--vermilion);
+            font-size: 18px;
+            padding: 16px;
+        }
+        .btn-dispatch:hover {
+            background-color: #a83823;
+        }
+
+        /* Receipt View */
+        #receipt-view {
+            display: none;
+            text-align: center;
+        }
+        
+        .progress-container {
+            width: 100%;
+            background-color: var(--paper-2);
+            border-radius: 50px;
+            height: 24px;
+            overflow: hidden;
+            margin: 32px 0;
+            border: 1px solid var(--line);
+        }
+        .progress-bar {
+            height: 100%;
+            background-color: var(--sage);
+            width: 0%;
+            transition: width 2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 32px;
+        }
+        .stat-card {
+            background: white;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 24px 16px;
+        }
+        .stat-value {
+            font-size: 32px;
+            font-family: var(--font-heading);
+            color: var(--night);
+            margin-bottom: 8px;
+        }
+        .stat-label {
+            font-size: 14px;
+            color: var(--sage);
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 50px;
+            background-color: var(--sage);
+            color: white;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <!-- STATE 1: COMPOSE -->
+        <div id="compose-view">
+            <div class="header">
+                <h2>🚨 Emergency Alert System</h2>
+                <div class="pill-toggle">
+                    <button id="mode-mock" class="active" onclick="setMode('mock')">Mock Mode</button>
+                    <button id="mode-live" onclick="setMode('live')">Live Mode</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="form-group">
+                    <label>Target Audience</label>
+                    <select id="audience" class="input-field">
+                        <option value="dindis">All Active Dindis</option>
+                        <option value="zone">Specific Zone</option>
+                        <option value="ngos">All NGOs</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Alert Template</label>
+                    <select id="template" class="input-field" onchange="updatePreview()">
+                        <option value="">-- Select Template --</option>
+                        <option value="flood">🌊 Flood Warning</option>
+                        <option value="accident">🚗 Road Accident</option>
+                        <option value="route">🔄 Route Change</option>
+                        <option value="camp">⛺ Camp Closure</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Custom Details (Optional)</label>
+                    <input type="text" id="custom-details" class="input-field" placeholder="e.g. Bridge on NH65 is closed" oninput="updatePreview()">
+                </div>
+
+                <div class="preview-card">
+                    <div class="preview-title">Live Message Preview</div>
+                    <div id="preview-text" class="preview-content">Select a template to generate the alert message...</div>
+                </div>
+
+                <button id="dispatch-btn" class="btn-primary btn-dispatch" onclick="dispatchAlert()">Dispatch Alert</button>
+            </div>
+        </div>
+
+        <!-- STATE 2: RECEIPT -->
+        <div id="receipt-view" class="card">
+            <h2>Dispatching Alert...</h2>
+            <div class="status-badge" id="dispatch-status">In Progress</div>
+            
+            <p>Target Audience: <strong id="receipt-audience">All Active Dindis</strong></p>
+            
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-targeted">0</div>
+                    <div class="stat-label">Targeted</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-delivered">0</div>
+                    <div class="stat-label">Delivered</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-pending">0</div>
+                    <div class="stat-label">Pending</div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 32px;">
+                <button class="btn-primary" onclick="resetView()">Create New Alert</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Check Authority Access
+        if (localStorage.getItem('userRole') !== 'authority' && localStorage.getItem('userRole') !== 'super_admin') {
+            document.body.innerHTML = '<h2 style="text-align:center; margin-top:50px;">Access Denied. Authority only.</h2>';
+        }
+
+        let currentMode = 'mock';
+        
+        const templates = {
+            'flood': {
+                en: "⚠️ URGENT: Flood warning issued for your current route. Please move to higher ground immediately.",
+                mr: "⚠️ तातडीचे: तुमच्या सध्याच्या मार्गावर पुराचा इशारा देण्यात आला आहे. कृपया तात्काळ सुरक्षित स्थळी जा."
+            },
+            'accident': {
+                en: "⚠️ ALERT: Major road accident reported ahead. Expect severe delays.",
+                mr: "⚠️ अलर्ट: पुढे मोठा रस्ते अपघात झाल्याचे वृत्त आहे. प्रवासास विलंब होऊ शकतो."
+            },
+            'route': {
+                en: "🔄 NOTICE: Route has been temporarily changed due to unforeseen circumstances. Follow police directions.",
+                mr: "🔄 सूचना: काही अपरिहार्य कारणास्तव मार्ग तात्पुरता बदलण्यात आला आहे. पोलिसांच्या सूचनांचे पालन करा."
+            },
+            'camp': {
+                en: "⛺ UPDATE: The upcoming resting camp is closed. Proceed to the next designated area.",
+                mr: "⛺ अपडेट: पुढील मुक्काम बंद आहे. कृपया पुढच्या निर्धारित ठिकाणी जा."
+            }
+        };
+
+        function setMode(mode) {
+            currentMode = mode;
+            document.getElementById('mode-mock').classList.toggle('active', mode === 'mock');
+            document.getElementById('mode-live').classList.toggle('active', mode === 'live');
+            
+            const dispatchBtn = document.getElementById('dispatch-btn');
+            if(mode === 'live') {
+                dispatchBtn.style.backgroundColor = '#8B0000'; // Darker red for live
+                dispatchBtn.innerText = 'DISPATCH LIVE ALERT (DANGER)';
+            } else {
+                dispatchBtn.style.backgroundColor = 'var(--vermilion)';
+                dispatchBtn.innerText = 'Dispatch Alert (Mock Mode)';
+            }
+        }
+
+        function updatePreview() {
+            const templateKey = document.getElementById('template').value;
+            const customDetails = document.getElementById('custom-details').value.trim();
+            const previewBox = document.getElementById('preview-text');
+
+            if (!templateKey) {
+                previewBox.innerText = "Select a template to generate the alert message...";
+                return;
+            }
+
+            const baseMsg = templates[templateKey];
+            let finalMsg = `${baseMsg.mr}\n\n${baseMsg.en}`;
+            
+            if (customDetails) {
+                finalMsg += `\n\nDetails / तपशील:\n${customDetails}`;
+            }
+            
+            previewBox.innerText = finalMsg;
+        }
+
+        function dispatchAlert() {
+            const templateKey = document.getElementById('template').value;
+            if (!templateKey) {
+                alert("Please select a template first.");
+                return;
+            }
+
+            const audience = document.getElementById('audience');
+            document.getElementById('receipt-audience').innerText = audience.options[audience.selectedIndex].text;
+
+            // Switch Views
+            document.getElementById('compose-view').style.display = 'none';
+            document.getElementById('receipt-view').style.display = 'block';
+
+            // Simulate dispatch progress
+            const totalTarget = Math.floor(Math.random() * 50) + 20; // 20 to 70 targets
+            document.getElementById('stat-targeted').innerText = totalTarget;
+            document.getElementById('stat-delivered').innerText = '0';
+            document.getElementById('stat-pending').innerText = totalTarget;
+            
+            let delivered = 0;
+            const progressBar = document.getElementById('progress-bar');
+            
+            const interval = setInterval(() => {
+                delivered += Math.floor(Math.random() * 5) + 1;
+                if (delivered >= totalTarget) {
+                    delivered = totalTarget;
+                    clearInterval(interval);
+                    
+                    document.getElementById('dispatch-status').innerText = 'Completed';
+                    document.getElementById('dispatch-status').style.backgroundColor = 'var(--marigold-deep)';
+                }
+                
+                document.getElementById('stat-delivered').innerText = delivered;
+                document.getElementById('stat-pending').innerText = totalTarget - delivered;
+                
+                const percentage = (delivered / totalTarget) * 100;
+                progressBar.style.width = `${percentage}%`;
+                
+            }, 300);
+        }
+
+        function resetView() {
+            document.getElementById('receipt-view').style.display = 'none';
+            document.getElementById('compose-view').style.display = 'block';
+            document.getElementById('progress-bar').style.width = '0%';
+            document.getElementById('dispatch-status').innerText = 'In Progress';
+            document.getElementById('dispatch-status').style.backgroundColor = 'var(--sage)';
+            
+            document.getElementById('template').value = '';
+            document.getElementById('custom-details').value = '';
+            updatePreview();
+        }
+
+        // Initialize defaults
+        setMode('mock');
+    </script>
+</body>
+</html>

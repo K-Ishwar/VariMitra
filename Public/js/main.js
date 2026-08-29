@@ -1,4 +1,5 @@
 import { dict } from './dict.js';
+import { initSuperAdmin } from './modules/superadmin.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     // 1. Language Initialization
@@ -98,6 +99,7 @@ function setupGatekeeper() {
     switch (userRole) {
         case 'super_admin':
             showElements('panel-super', ['nav-alerts', 'nav-map']);
+            initSuperAdmin();
             break;
         case 'authority':
             showElements('panel-authority', ['nav-alerts', 'nav-map']);
